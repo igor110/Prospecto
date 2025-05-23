@@ -1,0 +1,90 @@
+﻿
+<section class="content-header">
+    <h1>
+        @ViewData["Title"]
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Importar Atendimento</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="col-12 col-sm-12 col-md-3">
+                                <input type="file" class="filestyle" data-buttonname="btn-primary" name="imagem" id="filestyle-metas" tabindex="-1" data-buttontext="Importar Atendimentos" accept=".xlsx, .xls, .csv" style="position: absolute; clip: rect(0px 0px 0px 0px);">
+                                <div class="bootstrap-filestyle input-group">
+                                    <span class="group-span-filestyle input-group-btn" tabindex="0">
+                                        <label for="filestyle-metas" class="btn btn-primary "><span class="ti-image"></span> <span class="buttonText">Importar Atendimento</span></label>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+
+                    <hr />
+                    <div>
+                        <p>Modelo Layout Importação</p>
+                        <img src="~/img/LayoutImportacao.png" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts{
+    <script>
+
+        $("#filestyle-metas").on('change', function () {
+            var file, img;
+            if ((file = this.files[0])) {
+                sendFileExame();
+            }
+        });
+
+        function sendFileExame(file) {
+
+            var formData = new FormData();
+            formData.append('file', $('#filestyle-metas')[0].files[0]);
+            $.ajax({
+                url: '/AttendanceImport/Upload',
+                type: "POST",
+                processData: false,
+                data: formData, dataType: 'json',
+                contentType: false,
+                success: function (response) {
+                    if (response.success == true) {
+                        toastr.success(response.mensagem, 'Sistema de Gestão')
+                    }                                                
+                    else
+                        toastr.error(response.mensagem, 'Sistema de Gestão')
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 3000)
+                        
+                },
+                error: function (erro) {                    
+                    toastr.success(erro.mensagem, 'Sistema de Gestão')
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 3000)
+
+                }
+
+            });
+        }
+
+    </script>
+}
+
+
+

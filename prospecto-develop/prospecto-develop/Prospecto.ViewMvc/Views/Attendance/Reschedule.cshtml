@@ -1,0 +1,60 @@
+﻿@model Prospecto.Models.ViewModel.AttendanceViewModel
+
+@using (Html.BeginForm("SaveReschedule", "Attendance", FormMethod.Post, new { role = "Attendance" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Atendimento</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" id="Id" asp-for="Id" name="Id">
+
+                        <div class="row">                    
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="value">Data Retorno <span style="color: red">*</span></label>
+                                    <input placeholder="Data Retorno" required
+                                           class="form-control" id="dateReturn"
+                                           type="date"
+                                           name="DateReturn"
+                                           asp-for="DateReturn"
+                                           value="@(string.Format("{0:yyyy-MM-dd}", (Model.Id > 0 ? Model.DateReturn : DateTime.Now)))">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="box-footer">
+                        <div class="col-xs-2 pull-left" style="margin: 10px 0;">
+                            <a href="@Url.Action("Index", "Schedule")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                        </div>
+
+                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                            <button type="submit" class="btn btn-primary col-md-12">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @section Scripts{
+        <script>
+           
+        </script>
+    }
+}

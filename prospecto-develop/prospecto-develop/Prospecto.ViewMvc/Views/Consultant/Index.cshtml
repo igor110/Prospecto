@@ -1,0 +1,73 @@
+﻿@model Prospecto.Models.ViewModel.UserViewModel
+
+@using (Html.BeginForm("Save", "Consultant", FormMethod.Post, new { role = "Consultant" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Usuários</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <!-- Column -->
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <!-- Tab panes -->
+                    <div class="box-body">
+
+                        <input type="hidden" id="Id" name="Id" value="@Model.Id">
+                        <input type="hidden" asp-for="TypeUser" name="TypeUser" value="@Model.TypeUser">
+                        <input type="hidden" asp-for="CompanyId" name="CompanyId" value="@Model.CompanyId">
+                        <input type="hidden" asp-for="BranchId" name="BranchId" value="@Model.BranchId">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" class="form-control" id="name" name="Name" placeholder="Nome" value="@Model.Name">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="example-email">Email</label>
+                                    <input type="text" class="form-control" id="email" name="Email" placeholder="Email" value="@Model.Email">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="example-email">Senha</label>
+                                    <input type="password" asp-for="Password" class="form-control" id="password" name="Password" placeholder="Senha" value="@Model.Password">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="form-group">
+                            <div class="col-xs-6 pull-right" style="margin: 10px 0;">
+                                <button type="submit" class="btn btn-primary col-md-12">Salvar</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Column -->
+        </div>
+    </section>
+    @section Scripts{      
+    }
+}
+

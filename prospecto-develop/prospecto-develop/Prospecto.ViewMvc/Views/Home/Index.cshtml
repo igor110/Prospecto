@@ -1,0 +1,106 @@
+﻿@using Prospecto.Models.ViewModel
+@model IList<Prospecto.Models.ViewModel.RankingByConsultantViewModel>
+
+@using (Html.BeginForm("Raking", "Home"))
+{
+<section class="content-header">
+    <h1>
+        Dashboard
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Dashboard</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Vendas por consultor</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p class="text-center">
+                                @{
+                                        var dateTime = DateTime.Now.AddMonths(-3);
+                                    <strong>Vendas: @(new DateTime(dateTime.Year, dateTime.Month, 1).ToShortDateString()) até @DateTime.Now.ToShortDateString() </strong>
+                                }
+
+                            </p>
+
+                            <div class="chart">
+                                <!-- Sales Chart Canvas -->
+                                <canvas id="salesChart" style="height: 380px;"></canvas>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.row -->
+                </div>
+            </div>
+
+            @{
+                    await Html.RenderPartialAsync("Ranking");
+            }
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</section>
+
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var barChartData;
+            $.ajax({
+                url: "/Home/Dashboard",
+                type: "POST",
+                dataType: "json",
+                data: {},
+                success: function (data) {
+                    if (data.success == true) {
+                        barChartData = data.salesChartData;
+
+                        new Chart(document.getElementById("salesChart"), {
+                            type: 'bar',
+                            data: barChartData,
+                            options: {
+                                legend: {
+                                    display: true
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            label = barChartData.datasets[context.datasetIndex].label;
+                                            if (label == undefined)
+                                                label = context.label || '';
+
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.yLabel !== null) {
+                                                label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.yLabel);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+}
+}

@@ -1,0 +1,201 @@
+﻿@model Prospecto.Models.ViewModel.ClientViewModel
+
+@using (Html.BeginForm("Save", "Client", FormMethod.Post, new { role = "Client" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Cliente</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" id="Id" asp-for="Id" name="Id">
+                        <input type="hidden" asp-for="CompanyId" name="CompanyId">
+                        <input type="hidden" asp-for="BranchId" name="BranchId">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="TypePerson">Tipo Pessoa</label>
+                                    <select asp-for="TypePerson" name="TypePerson" id="typePerson" asp-items="ViewBag.ListTypePerson" class="form-control input select2">
+                                    </select>
+                                    <span class="text-danger field-validation-error" style="display: none">Informe o tipo de pessoa!</span>
+                                </div>
+                            </div>
+
+                            <div style="display: @(Model.TypePerson == Prospecto.Models.Enums.ClientTypePersonEnum.PHYSICAL ? "" : "none")" class="col-md-4 cpf ">
+                                <div class="form-group">
+                                    <label asp-for="CPF">CPF</label>
+                                    <input type="text" class="form-control" id="cpf" asp-for="CPF" name="CPF" placeholder="CPF">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe cpf corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div style="display: @(Model.TypePerson == Prospecto.Models.Enums.ClientTypePersonEnum.LEGAL ? "" : "none")" class="col-md-4 cnpj">
+                                <div class="form-group">
+                                    <label asp-for="CNPJ">CNPJ</label>
+                                    <input type="text" class="form-control" id="cnpj" asp-for="CNPJ" name="CNPJ" placeholder="CNPJ">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe cnpj corretamente!</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label asp-for="Name">Nome <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="name" asp-for="Name" name="Name" placeholder="Name">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe o nome do cliente corretamente!</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label asp-for="Email">Email</label>
+                                    <input type="text" class="form-control" asp-for="Email" name="Email" placeholder="Email">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe email corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Telephone">Telefone <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="telephone" asp-for="Telephone" name="Telephone" placeholder="Telefone">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe telefone corretamente!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="ZipCode">Cep</label>
+                                    <input type="text" class="form-control" id="zipcode" asp-for="ZipCode" name="ZipCode" placeholder="Cep">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe cep corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Address">Endereço</label>
+                                    <input type="text" class="form-control" id="address" asp-for="Address" name="Address" placeholder="Endereço">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe endereço corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="Number">Número</label>
+                                    <input type="text" class="form-control" id="number" asp-for="Number" name="Number" placeholder="Número">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe número corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Complement">Complemento</label>
+                                    <input type="text" class="form-control" asp-for="Complement" name="Complement" placeholder="Complemento">                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Neighborhood">Bairro</label>
+                                    <input type="text" class="form-control" id="neighborhood" asp-for="Neighborhood" name="Neighborhood" placeholder="Bairro">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe bairro corretamente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="City">Cidade</label>
+                                    <input type="text" class="form-control" asp-for="City" name="City" placeholder="Cidade">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe a cidade corretamente!</span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <div class="col-md-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("List", "Client")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            <div class="col-md-2 pull-right" style="margin: 10px 0;">
+                                <button id="save" type="submit" class="btn btn-primary col-md-12">Salvar</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @section Scripts{
+        <script>
+            $("#telephone").mask("(99)99999-9999");
+            $("#cpf").mask("999.999.999-99");
+            $("#cnpj").mask("99.999.999/9999-99");
+            $("#zipcode").mask("99999-999");
+
+            $('#typePerson').on('change', function () {
+                $('#cpf, #cnpj').val('');
+                if ($('#typePerson :selected').val() == "1") {
+                    $('.cpf').show();
+                    $('.cnpj').hide();
+                } else {
+                    $('.cpf').hide();
+                    $('.cnpj').show();
+                }
+            })
+
+            $("#save").click(function () {
+                return validade();
+            });
+
+            function validade() {                
+                var client = $('#name');
+                var telephone = $('#telephone');
+                var count = 0;             
+
+                if (client.val() == "") {
+                    count++;
+                    client.next()[0].style.display = '';
+                } else {
+                    client.next()[0].style.display = 'none';
+                }
+
+                if (telephone.val() == "") {
+                    count++;
+                    telephone.next()[0].style.display = '';
+                } else {
+                    telephone.next()[0].style.display = 'none';
+                }                  
+
+                //Retorno
+                if (count == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+        </script>
+    }
+}

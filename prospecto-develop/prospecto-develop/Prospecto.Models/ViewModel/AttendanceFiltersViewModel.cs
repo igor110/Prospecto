@@ -1,0 +1,17 @@
+﻿using Prospecto.Models.Enums;
+using Prospecto.Models.ViewModel.Base;
+using System;
+
+namespace Prospecto.Models.ViewModel
+{
+    public class AttendanceFiltersViewModel : PaginationBase
+    {
+        public int? CompanyId { get; set; }
+        public int? BranchId { get; set; }
+        public int? UserId { get; set; }
+        public int TypeDate { get; set; }
+        public StatusAttendancesEnum Status { get; set; }
+        public DateTime? BeginDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
+}

@@ -1,0 +1,63 @@
+﻿@model Prospecto.Models.ViewModel.CompanyViewModel
+
+@using (Html.BeginForm("Save", "Company", FormMethod.Post, new { role = "form" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Empresa</li>
+        </ol>
+    </section>
+    <section class="content">
+        @Html.ValidationSummary(true)
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" id="Id" name="Id" value="@Model.Id">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>ID</label>
+                                    <input type="text" class="form-control" id="id" asp-for="Id" readonly placeholder="Id" value="@Model.Id.ToString("0000")">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="example-email">Descrição <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="description" asp-for="Description" placeholder="Descrição">
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+
+                            <div class="col-md-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("List", "Company")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            <div class="col-md-2 pull-right" style="margin: 10px 0;">
+                                <button type="submit" class="btn btn-primary col-md-12">Salvar</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            @Html.AntiForgeryToken()
+            <!-- Column -->
+        </div>
+    </section>
+}
+

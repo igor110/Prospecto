@@ -1,0 +1,77 @@
+﻿<section class="content-header">
+    <h1>
+        @ViewData["Title"]
+        <small>@ViewData["Message"]</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Atendimento</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body">
+                    <div class="col-sm-12">
+                        <div class="col-xs-12">
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group pull-right">
+                                    <a class="btn btn-primary" href="@Url.Action("Index", "Client")" id="BotaoCriar"><span class="fa fa-plus"></span>&nbsp;Adicionar</a>
+                                </div>
+                            </div>
+                            <hr />
+                        </div>
+
+                        <div id="listGrid" class="row">
+                            @{
+                                await Html.RenderPartialAsync("ListPartial");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts{
+
+    <script>
+        $('#tableClient').DataTable({
+            dom: 'B<"top col-md-3 pull-right"f>rt<"bottom"<"col-md-2 pull-left"l><"col-md-3"i><"col-md-7"p>><"clear">',
+            buttons: [{
+                extend: "excel",
+                className: "btn-sm",
+                text: 'Excel',
+            }],
+            'iDisplayLength': 25,
+            'paging': true,
+            'responsive': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            "scrollX": true,
+            'autoWidth': false,
+            "oLanguage": {
+                "sLengthMenu": 'Mostrar <select><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> registros.',
+                "sSearch": "Pesquisar:",
+                "sInfo": "Exibindo (_START_ de _END_) do(s) _TOTAL_ registro(s).",
+                "sZeroRecords": "Nenhum registro econtrado.",
+                "oPaginate": {
+                    "sLast": "Última Página",
+                    "sFirst": "Primeira Página",
+                    "sNext": "Próxima",
+                    "sPrevious": "Anterior"
+                }
+            }
+        })
+
+        $("#tableClient tbody tr").on("dblclick", function (event) {
+            var id = this.cells[0].id;
+            if (id != "")
+                window.location.href = "@Url.Action("Index", "Client")?Id="+id+"";
+        });
+    </script>
+}
+

@@ -1,0 +1,285 @@
+﻿@model Prospecto.Models.ViewModel.AttendanceViewModel
+
+@using (Html.BeginForm("SaveClose", "Attendance", FormMethod.Post, new { role = "Attendance" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Atendimento</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" id="Id" asp-for="Id" name="Id">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="StatusOrder">Status Pedido <span style="color: red">*</span></label>
+                                    <select asp-for="StatusOrder" name="StatusOrder" id="StatusOrder" asp-items="ViewBag.ListStatusClosed" class="form-control input select2">
+                                        <option value="0">Selecione uma opção</option>
+                                    </select>
+                                    <span class="text-danger field-validation-error" style="display: none">Informe um status corretamente!</span>
+                                </div>
+                            </div>
+
+                            @{
+                                <div style="display: @(Model.StatusOrder == Prospecto.Models.Enums.StatusOrderEnum.GAIN ? "" : "none") " class="col-md-2 statusOrder">
+                                    <div class="form-group">
+                                        <label asp-for="ValueClosed">Valor Fechado <span style="color: red">*</span></label>
+                                        <input type="text" class="form-control" id="valueClosed" asp-for="ValueClosed" name="ValueClosed" placeholder="Valor Fechado" />
+                                        <span class="text-danger field-validation-error" style="display: none">Informe um valor corretamente!</span>
+                                    </div>
+                                </div>
+
+                            }
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="value">Data Fechamento <span style="color: red">*</span></label>
+                                    <input type="date" class="form-control" id="dateClosed" name="DateClosed" asp-for="DateClosed" value="@(string.Format("{0:yyyy-MM-dd}", DateTime.Now))">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe a data do fechamento corretamente</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div style="display: @(Model.StatusOrder == Prospecto.Models.Enums.StatusOrderEnum.GAIN ? "" : "none") " class="statusOrder">
+                            <h4><b>Dados Cliente</b></h4>
+                            <hr />
+
+                            <div class="row ">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label asp-for="Client.TypePerson">Tipo Pessoa</label>
+                                        <select asp-for="Client.TypePerson" name="TypePerson" id="typePerson" asp-items="ViewBag.ListTypePerson" class="form-control input select2">
+                                        </select>
+                                        <span class="text-danger field-validation-error" style="display: none">Informe o tipo de pessoa!</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: @(Model.Client.TypePerson == Prospecto.Models.Enums.ClientTypePersonEnum.PHYSICAL ? "" : "none")" class="col-md-4 cpf">
+                                    <div class="form-group">
+                                        <label asp-for="Client.CPF">CPF</label>
+                                        <input type="text" class="form-control" id="cpf" asp-for="Client.CPF" name="Client.CPF" placeholder="CPF">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe cpf corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: @(Model.Client.TypePerson == Prospecto.Models.Enums.ClientTypePersonEnum.LEGAL ? "" : "none")" class="col-md-4 cnpj">
+                                    <div class="form-group">
+                                        <label asp-for="Client.CNPJ">CNPJ</label>
+                                        <input type="text" class="form-control" id="cnpj" asp-for="Client.CNPJ" name="CNPJ" placeholder="CNPJ">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe cnpj corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Email">Email</label>
+                                        <input type="text" class="form-control" id="email" asp-for="Client.Email" name="Client.Email" placeholder="Email">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe email corretamente!</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Name">Cliente <span style="color: red">*</span></label>
+                                        <input type="text" class="form-control" id="client" name="Client.Name" asp-for="Client.Name" placeholder="Cliente">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe o nome do cliente corretamente!</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Telephone">Telefone <span style="color: red">*</span></label>
+                                        <input type="text" class="form-control" id="telephone" asp-for="Client.Telephone" name="Client.Telephone" placeholder="Telefone">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe telefone corretamente!</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label asp-for="Client.ZipCode">Cep</label>
+                                        <input type="text" class="form-control" id="zipcode" asp-for="Client.ZipCode" name="Client.ZipCode" placeholder="Cep">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe cep corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Address">Endereço</label>
+                                        <input type="text" class="form-control" id="address" asp-for="Client.Address" name="Client.Address" placeholder="Endereço">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe endereço corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Number">Número</label>
+                                        <input type="text" class="form-control" id="number" asp-for="Client.Number" name="Client.Number" placeholder="Número">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe número corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Complement">Complemento</label>
+                                        <input type="text" class="form-control" asp-for="Client.Complement" name="Client.Complement" placeholder="Complemento">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Client.Neighborhood">Bairro</label>
+                                        <input type="text" class="form-control" id="neighborhood" asp-for="Client.Neighborhood" name="Client.Neighborhood" placeholder="Bairro">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe bairro corretamente!</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Client.City">Cidade</label>
+                                        <input type="text" class="form-control" id="city" asp-for="Client.City" name="Client.City" placeholder="Cidade">
+                                        <span class="text-danger field-validation-error" style="display: none">Informe a cidade corretamente!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box-footer">
+                        <div class="col-xs-2 pull-left" style="margin: 10px 0;">
+                            <a href="@Url.Action("Index", "Schedule")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                        </div>
+
+                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                            <button id="save" type="submit" class="btn btn-primary col-md-12">Confirmar</button>
+                        </div>
+                    </div>
+                    @Html.AntiForgeryToken()
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @section Scripts{
+        <script>
+            $("#telephone").mask("(99)99999-9999");
+            $("#cnpj").mask("99.999.999/9999-99");
+            $("#cpf").mask("999.999.999-99");
+            $("#zipcode").mask("99999-999");
+
+            $('#typePerson').on('change', function () {
+                $('#cpf, #cnpj').val('');
+                if ($('#typePerson :selected').val() == "1") {
+                    $('.cpf').show();
+                    $('.cnpj').hide();
+                } else {
+                    $('.cpf').hide();
+                    $('.cnpj').show();
+                }
+            })
+
+            $("#save").click(function () {
+                return validade();
+            });
+
+            function validade() {
+                var status = $('#StatusOrder');
+                var value = $('#valueClosed');
+                var statusVal = parseInt($('#StatusOrder :selected').val());
+                var client = $('#client');
+                var telephone = $('#telephone');
+                var dateClosed = $('#dateClosed');
+                var count = 0;
+
+                if (dateClosed.val() <= 0) {
+                    count++;
+                    dateClosed.next()[0].style.display = '';
+                } else {
+                    dateClosed.next()[0].style.display = 'none';
+                }
+
+                if (statusVal == 0) {
+                    count++;
+                    status.next()[0].style.display = '';
+                } else {
+                    status.next()[0].style.display = 'none';
+
+                    if (statusVal == 1) {
+                        if (value.val() == "") {
+                            count++;
+                            value.next()[0].style.display = '';
+                        } else {
+                            value.next()[0].style.display = 'none';
+                        }
+
+                        if (parseFloat(value.val()) <= 0) {
+                            count++;
+                            value.next()[0].style.display = '';
+                        } else {
+                            value.next()[0].style.display = 'none';
+                        }
+
+                        if (client.val() == "") {
+                            count++;
+                            client.next()[0].style.display = '';
+                        } else {
+                            client.next()[0].style.display = 'none';
+                        }
+
+                        if (telephone.val() == "") {
+                            count++;
+                            telephone.next()[0].style.display = '';
+                        } else {
+                            telephone.next()[0].style.display = 'none';
+                        }
+                    }
+                }
+
+                //Retorno
+                if (count == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            $(document).ready(function () {
+                $('#StatusOrder').on('change', function () {
+                    StatusOrder();
+                })
+            })
+
+            function StatusOrder() {
+                var status = $('#StatusOrder :selected').val();
+                if (status == 1) $('.statusOrder').show();
+                else $('.statusOrder').hide();
+            }
+
+            $('#valueClosed').autoNumeric('init', {
+                aSep: '.',
+                aDec: ',',
+                vMax: '9999999999.99',
+                mDec: '2',
+                vMin: '000'
+            });
+
+        </script>
+    }
+}

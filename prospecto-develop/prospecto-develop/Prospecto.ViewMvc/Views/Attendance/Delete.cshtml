@@ -1,0 +1,123 @@
+﻿@model Prospecto.Models.ViewModel.AttendanceViewModel
+
+
+@using (Html.BeginForm("ConfirmDelete", "Attendance", new { Id = Model.Id }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Atendimento</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">                                            
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label asp-for="NameClient">Cliente</label>
+                                    <input readonly type="text" class="form-control" id="nameClient" name="NameClient" asp-for="NameClient" placeholder="Cliente" value="@Model.NameClient">                                    
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="Telephone">Telefone</label>
+                                    <input readonly type="text" class="form-control" id="telephone" asp-for="Telephone" name="Telephone" placeholder="Telefone">                                    
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="ReschedulingOrigin">Origem agendamento</label>
+                                    <select disabled asp-for="ReschedulingOrigin" name="ReschedulingOrigin" id="source" asp-items="ViewBag.ListSource" class="form-control input select2">
+                                    </select>                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label asp-for="NameProduct">Produto</label>
+                                    <input readonly type="text" class="form-control" id="product" asp-for="NameProduct" name="NameProduct" placeholder="Produto">                                    
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="Value">Valor</label>
+                                    <input readonly type="text" class="form-control" id="value" asp-for="Value" name="Value" placeholder="Valor">                                    
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="value">Data Retorno</label>
+                                    <input readonly type="date" class="form-control" id="dateReturn" name="DateReturn" placeholder="Data Retorno"
+                                           asp-for="DateReturn" value="@(string.Format("{0:yyyy-MM-dd}", Model.DateReturn))">                                    
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Observation">Observação</label>
+                                    <textarea readonly class="form-control" asp-for="Observation" required name="Observation" id="observation" rows="5"></textarea>                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+
+                            <div class="col-xs-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("List", "Attendance")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            @{
+                                if (Model.Status == Prospecto.Models.Enums.StatusAttendancesEnum.CLOSED)
+                                {
+                                    <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                                        <button type="submit" class="btn btn-danger col-md-12">Excluir</button>
+                                    </div>
+                                    
+                                }
+
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Column -->
+        </div>
+    </section>
+
+    @section Scripts{
+        <script>
+            $("#telephone").mask("(99)99999-9999");            
+
+            $('#value').autoNumeric('init', {
+                aSep: '.',
+                aDec: ',',
+                vMax: '9999999999.99',
+                mDec: '2',
+                vMin: '000'
+            });
+        </script>
+    }
+}
+
+
+
+

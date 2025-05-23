@@ -1,0 +1,73 @@
+﻿<section class="content-header">
+    <h1>
+        @ViewData["Title"]
+        <small>@ViewData["Message"]</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Empresa</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body">
+                    <div class="col-sm-12">
+                        <div class="col-xs-12">
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group pull-right">
+                                    <a class="btn btn-primary" href="@Url.Action("Index", "Company")" id="BotaoCriar"><span class="fa fa-plus"></span>&nbsp;Adicionar</a>
+                                </div>
+                            </div>
+                            <hr />
+                        </div>
+
+                        <div id="listGrid" class="row">
+                            @{
+                                await Html.RenderPartialAsync("ListPartial");
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</section>
+@section Scripts{
+
+    <script>
+        $('#tableCompany').DataTable({
+            dom: "Bfrtip",
+            buttons: [{
+                extend: "excel",
+                className: "btn-sm",
+                text: 'Excel',
+            }],
+            'paging': true,
+            'lengthChange': false,
+            'searching': false,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            "oLanguage": {
+                "sLengthMenu": 'Mostrar <select><option value="50">50</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="500">500</option><option value="-1">Todos</option></select> registros.',
+                "sSearch": "Pesquisar:",
+                "sInfo": "Exibindo (_START_ de _END_) do(s) _TOTAL_ registro(s).",
+                "sZeroRecords": "Nenhum registro econtrado.",
+                "oPaginate": {
+                    "sLast": "Última Página",
+                    "sFirst": "Primeira Página",
+                    "sNext": "Próxima",
+                    "sPrevious": "Anterior"
+                }
+            }
+        })
+
+        $("#tableCompany tbody tr").on("dblclick", function (event) {
+            var id = this.cells[0].id;
+            window.location.href = "@Url.Action("Index", "Company")?Id="+id+"";
+        });
+    </script>
+}
+

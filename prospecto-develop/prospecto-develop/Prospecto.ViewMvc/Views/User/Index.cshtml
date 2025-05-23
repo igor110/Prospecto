@@ -1,0 +1,132 @@
+﻿@model Prospecto.Models.ViewModel.UserViewModel
+@using Prospecto.Models.Enums;
+
+@using (Html.BeginForm("Save", "User", FormMethod.Post, new { role = "form" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Usuários</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <!-- Column -->
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <!-- Tab panes -->
+                    <div class="box-body">
+
+                        <input type="hidden" id="Id" name="Id" value="@Model.Id">
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" class="form-control" id="name" name="Name" placeholder="Nome" value="@Model.Name">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="TypeUser">Tipo</label>
+                                    <select asp-for="TypeUser" name="TypeUser" id="TypeUser" asp-items="@ViewBag.ListType" class="form-control">
+                                    </select>
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="IsActive">Ativo</label>
+                                    <select asp-for="IsActive" name="IsActive" id="IsActive" asp-items="@ViewBag.ListActive" class="form-control">                                        
+                                    </select>                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label for="example-email">Email</label>
+                                    <input type="text" class="form-control" id="email" name="Email" placeholder="Email" value="@Model.Email">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="example-email">Senha</label>
+                                    <input type="password" class="form-control" id="password" name="Password" placeholder="Senha" value="@Model.Password">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="example-email">Cor</label>
+                                    <input type="text" class="form-control" asp-for="Color" name="Color" placeholder="Cor" value="@Model.Color">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CompanyId">Empresa</label>
+                                    <select asp-for="CompanyId" name="CompanyId" id="CompanyId" asp-items="ViewBag.ListCompany" class="form-control input select2">
+                                    </select>
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="BranchId">Filial</label>
+                                    <select asp-for="BranchId" name="BranchId" id="BranchId" asp-items="ViewBag.ListBranch" class="form-control input select2">
+                                        <option>Selecione uma filial</option>
+                                    </select>
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+
+
+                            <div class="col-md-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("List", "User")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            <div class="col-md-2 pull-right" style="margin: 10px 0;">
+                                <button type="submit" class="btn btn-primary col-md-12">Salvar</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Column -->
+        </div>
+    </section>
+    @section Scripts{
+        <script>
+            $('#filial').on('change', function () {
+                $('#companyId').val($('#filial :selected').val());
+            });
+
+            $('#type').on('change', function () {
+                $('#userType').val($('#type :selected').val());
+            });
+
+
+        </script>
+    }
+}
+

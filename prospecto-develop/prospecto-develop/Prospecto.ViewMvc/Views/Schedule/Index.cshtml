@@ -1,0 +1,144 @@
+﻿<section class="content-header">
+    <h1>
+        @ViewData["Title"]
+        <small>@ViewData["Message"]</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Agenda</li>
+    </ol>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-body no-padding">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="btn-toolbar" role="toolbar">
+                                <br />
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Consultor</label>
+                                        <select id="consultorSelected" asp-items="ViewBag.ListConsultant" class="form-control input select2">
+                                        </select>
+                                        <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Oportunidades </label>
+                                        <input readonly type="text" id="oportunidade" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Venda </label>
+                                        <input readonly type="text" id="vendas" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="btn-group pull-right col-md-2">
+                                    <a class="btn btn-primary" style="margin-top: 25px;" href="@Url.Action("Index", "Attendance")" id="BotaoCriar"><span class="fa fa-plus"></span>&nbsp;Adicionar</a>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts{
+<script>
+    $(function () {
+
+        var date = new Date()
+        var d = date.getDate(),
+            m = date.getMonth(),
+            y = date.getFullYear();
+
+        $('#calendar').fullCalendar({
+            locale: 'pt-br',
+            height: $(window).height()/1.4,
+            width: $(window).width(),
+            slotDuration: '00:15:00',
+            handleWindowResize: true,
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            buttonText: {
+                today: 'Hoje',
+                month: 'Mês',
+                week: 'Semana',
+                day: 'Dia'
+            },
+            events: null,
+            editable: true,
+            droppable: true,
+            eventLimit: false, // allow "more" link when too many events
+            selectable: false,
+            select: function (start, end, allDay) { },
+            eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
+                editEventSchedule(event);
+            },
+            viewRender: function (view, element) {
+                consultaEventosAgenda();
+            },
+            eventClick: function (calEvent, jsEvent, view) {
+                editEvent(calEvent);
+            }
+        })
+
+        function editEvent(calEvent) {
+            location.href = "/Attendance/Index/" + calEvent.id;
+        }
+
+        function consultaEventosAgenda() {
+            $('#calendar').fullCalendar('removeEvents');
+            var view = $('#calendar').fullCalendar('getView');
+            var dataInicio = view.intervalStart.format("DD/MM/YYYY");
+            var dataFinal = view.intervalEnd.format("DD/MM/YYYY");
+            var userId = $('#consultorSelected :selected').val();
+
+            $.ajax({
+                url: "/Schedule/EventsSchedule",
+                type: "POST",
+                dataType: "json",
+                data: { dateInit: dataInicio, dateEnd: dataFinal, userId: userId },
+                success: function (data) {
+                    if (data.success == true) {
+                        $("#calendar").fullCalendar('addEventSource', data.itens);
+                        $('#oportunidade').val(data.oportunidade);
+                        $('#vendas').val(data.vendas);
+                    }
+                }
+            });
+        }
+
+        function editEventSchedule(event) {
+
+            $.ajax({
+                url: "/Schedule/EditEventsSchedule",
+                type: "POST",
+                dataType: "json",
+                data: { idEvent: event.id, date: event.start.format() },
+                success: function (data) {
+                    if (data.success == true) {
+                        toastr.success("Agenda alterada com sucesso!", "Sistema Gestão");
+                    }
+                }
+            });
+        }
+
+        $('#consultorSelected').on('change', function () {
+            consultaEventosAgenda();
+        })
+
+
+    })</script>
+}
+

@@ -1,0 +1,91 @@
+﻿@using Prospecto.Models.ViewModel
+@model IList<Prospecto.Models.ViewModel.RankingByConsultantViewModel>
+
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Ranking</h3>
+
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                <i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="row">
+            <div class="col-md-12">
+
+                <p class="text-center">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="value">Data Inicio </label>
+                                <input type="date" class="form-control" id="RakingBeginDate" name="RakingBeginDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.RakingBeginDate))">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="EndDate">Data Fim </label>
+                                <input type="date" class="form-control" id="RakingEndDate" name="RakingEndDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.RakingEndDate))">
+                            </div>
+                        </div>
+
+                        <div class="col-xs-2 pull-right" style="margin: 10px 0; margin-top: 25px;">
+                            <button type="submit" formaction="Ranking" class="btn btn-default col-md-12"><span class="fa fa-filter"></span>&nbsp;Filtrar</button>
+                        </div>
+
+                    </div>
+
+                    
+                </p>
+
+                <div>
+                    @{
+
+                        var resultBranch = Model
+                            .GroupBy(l => l.BranchId)
+                            .Select(cl => new RankingByConsultantViewModel
+                            {
+                                BranchId = cl.First().BranchId,
+                                BranchName = cl.First().BranchName,
+                                ValueClosed = cl.Sum(c => c.ValueClosed),
+                                Meta = cl.First().Meta
+                            }).ToList();
+
+                        foreach (var branch in resultBranch)
+                        {
+                            <h3 class="box-title">@(branch.BranchName + " - " + string.Format("{0:c}",  branch.ValueClosed) + " Meta Loja: (" + string.Format("{0:c}", branch.Meta) + ")")</h3>
+
+                            var result = Model
+                                .Where(x => x.BranchId == branch.BranchId)
+                                .GroupBy(l => l.ConsultantId)
+                                .Select(cl => new RankingByConsultantViewModel
+                                {
+                                    Consultant = cl.First().Consultant,
+                                    ValueClosed = cl.Sum(c => c.ValueClosed),
+                                    Color = cl.First().Color
+                                }).ToList();
+
+                            foreach (var consultant in result.OrderByDescending(x => x.ValueClosed))
+                            {
+                                <label>@(consultant.Consultant + " (" + string.Format("{0:c}",  consultant.ValueClosed) + "/" + Convert.ToInt32(consultant.ValueClosed / (branch.Meta > 0 ? branch.Meta : 1) * 100) + "%) ")</label>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="@consultant.ValueClosed"
+                                         aria-valuemin="0" aria-valuemax="@consultant.Meta" style="width: @(Convert.ToInt32(consultant.ValueClosed / (branch.Meta > 0 ? branch.Meta : 1) *100))%; background-color: @consultant.Color">
+                                        
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+
+                </div>
+
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+</div>

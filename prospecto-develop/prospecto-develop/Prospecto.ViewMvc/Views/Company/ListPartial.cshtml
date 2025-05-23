@@ -1,0 +1,33 @@
+﻿
+@model IEnumerable<Prospecto.Models.ViewModel.CompanyViewModel>
+
+
+<div class="adv-table">
+    <table id="tableCompany" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr style="cursor: pointer">
+                    <td id="@item.Id" style="width: 5%">  @item.Id.ToString("0000") </td>
+                    <td style="width: 30%"> @item.Description </td>
+                    <td style="width: 5%">
+                        <div class="text-center">
+                            <a class="fa fa-pencil" title="Editar" data-id="@item.Id" style="font-size: 16px; color: #75798B" href="@Url.Action("Index", "Company", new { Id = item.Id })"></a>
+                            @*<a class="fa fa-remove" title="Excluir" data-id="@item.Id" style="font-size: 16px; color: #75798B" onclick="Excluir($(this))"></a>*@
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>    
+</div>
+
+
+

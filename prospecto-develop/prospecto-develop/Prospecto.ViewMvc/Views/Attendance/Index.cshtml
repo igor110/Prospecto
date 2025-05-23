@@ -1,0 +1,244 @@
+﻿@model Prospecto.Models.ViewModel.AttendanceViewModel
+
+
+@using (Html.BeginForm("Save", "Attendance", FormMethod.Post, new { role = "Attendance" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Atendimento</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+
+                        <input type="hidden" id="Id" asp-for="Id" name="Id">
+                        <input type="hidden" id="Id" asp-for="DateRegistred" name="DateRegistred">
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label asp-for="NameClient">Cliente <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="nameClient" name="NameClient" asp-for="NameClient" placeholder="Cliente" value="@Model.NameClient">
+                                    <span class="text-danger field-validation-error" style="display: none">Entre com o nome do cliente!</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="Telephone">Telefone <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="telephone" asp-for="Telephone" name="Telephone" placeholder="Telefone">
+                                    <span class="text-danger field-validation-error" style="display: none">Entre com o telefone do cliente!</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="ReschedulingOrigin">Origem agendamento</label>
+                                    <select asp-for="ReschedulingOrigin" name="ReschedulingOrigin" id="source" asp-items="ViewBag.ListSource" class="form-control input select2">
+                                    </select>
+                                    <span class="text-danger field-validation-error" style="display: none">Informe a origem do agendamento</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label asp-for="NameProduct">Produto <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="product" asp-for="NameProduct" name="NameProduct" placeholder="Produto">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe o produto corretamente</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="Value">Valor <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="value" asp-for="Value" name="Value" placeholder="Valor">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe um valor corretamente</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="value">Data Retorno <span style="color: red">*</span></label>
+                                    <input 
+    type="date" 
+    class="form-control" 
+    id="dateReturn" 
+    name="DateReturn" 
+    placeholder="Data Retorno"
+    @(Model.Id > 0 ? "readonly" : null) />
+                                           asp-for="DateReturn" value="@(Model.Id > 0 ? string.Format("{0:yyyy-MM-dd}", Model.DateReturn) : "")">
+                                    <span class="text-danger field-validation-error" style="display: none">Informe uma data corretamente</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Observation">Observação  <span style="color: red">*</span></label>
+                                    <textarea class="form-control" asp-for="Observation" required name="Observation" id="observation" rows="5"></textarea>
+                                    <span class="text-danger field-validation-error" style="display: none">Informe um observação corretamente</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="box-footer">
+
+                            <div class="col-xs-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("Index", "Schedule")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            @{
+                                if (Model.Status == Prospecto.Models.Enums.StatusAttendancesEnum.OPEN || Model.Status == 0)
+                                {
+
+                                    if (Model.Id > 0)
+                                    {
+                                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                                            <button type="submit" formaction="../Save" class="btn btn-primary col-md-12">Salvar</button>
+                                        </div>
+
+                                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                                            <button type="submit" formaction="../ReschedulePartial" class="btn btn-default col-md-12">Reagendar</button>
+                                        </div>
+
+                                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                                            <button type="submit" formaction="../ClosePartial" class="btn btn-default col-md-12">Encerrar</button>
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        <div class="col-xs-2 pull-right" style="margin: 10px 0;">
+                                            <button id="save" type="submit" formaction="Save" class="btn btn-primary col-md-12">Salvar</button>
+                                        </div>
+                                    }
+                                }
+
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Column -->
+        </div>
+    </section>
+
+    @section Scripts{
+        <script>
+            $("#telephone").mask("(99)99999-9999");
+
+            $("#save").click(function () {
+                return validade();
+            });
+
+            function validade() {
+                var name = $('#nameClient');
+                var telephone = $('#telephone');
+                var source = $('#source');
+                var sourceVal = parseInt($('#source :selected').val());
+                var product = $('#product');
+                var value = $('#value');
+                var dateReturn = $('#dateReturn');
+                var observation = $('#observation');
+
+                var count = 0;
+
+                if (name.val() <= 0) {
+                    count++;
+                    name.next()[0].style.display = '';
+                } else {
+                    name.next()[0].style.display = 'none';
+                }
+
+                if (telephone.val() <= 0) {
+                    count++;
+                    telephone.next()[0].style.display = '';
+                } else {
+                    telephone.next()[0].style.display = 'none';
+                }                
+
+                if (sourceVal == 0) {
+                    count++;
+                    source.next()[0].style.display = '';
+                } else {
+                    source.next()[0].style.display = 'none';
+                }
+
+                if (telephone.val() <= 0) {
+                    count++;
+                    telephone.next()[0].style.display = '';
+                } else {
+                    telephone.next()[0].style.display = 'none';
+                }
+
+                if (product.val() <= 0) {
+                    count++;
+                    product.next()[0].style.display = '';
+                } else {
+                    product.next()[0].style.display = 'none';
+                }
+
+                if (value.val() == "") {
+                    count++;
+                    value.next()[0].style.display = '';
+                } else {
+                    value.next()[0].style.display = 'none';
+                }
+
+                if (parseFloat(value.val()) <= 0) {
+                    count++;
+                    value.next()[0].style.display = '';
+                } else {
+                    value.next()[0].style.display = 'none';
+                }
+
+                if (dateReturn.val() <= 0) {
+                    count++;
+                    dateReturn.next()[0].style.display = '';
+                } else {
+                    dateReturn.next()[0].style.display = 'none';
+                }
+
+                if (observation.val() <= 0) {
+                    count++;
+                    observation.next()[0].style.display = '';
+                } else {
+                    observation.next()[0].style.display = 'none';
+                }
+
+                //Retorno
+                if (count == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            $('#value').autoNumeric('init', {
+                aSep: '.',
+                aDec: ',',
+                vMax: '9999999999.99',
+                mDec: '2',
+                vMin: '000'
+            });
+        </script>
+    }
+}
+
+
+
+

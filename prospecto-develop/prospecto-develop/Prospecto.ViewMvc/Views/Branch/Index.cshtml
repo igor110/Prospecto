@@ -1,0 +1,92 @@
+﻿@model Prospecto.Models.ViewModel.BranchViewModel
+
+@using (Html.BeginForm("Save", "Branch", FormMethod.Post, new { role = "form" }))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+            <small>@ViewData["Message"]</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Filial</li>
+        </ol>
+    </section>
+    <section class="content">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" id="Id" name="Id" value="@Model.Id">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>ID</label>
+                                    <input type="text" class="form-control" id="id" asp-for="Id" readonly placeholder="Id" value="@Model.Id.ToString("0000")">
+                                    <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="example-email">Descrição <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="description" asp-for="Description" placeholder="Descrição">
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="SalesGoal">Meta <span style="color: red">*</span></label>
+                                    <input type="text" class="form-control" id="salesGoal" asp-for="SalesGoal" name="SalesGoal" placeholder="0,00">                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="CompanyId">Empresa <span class="text-danger">*</span></label>
+                                    <select asp-for="CompanyId" name="CompanyId" id="CompanyId" asp-items="ViewBag.ListCompany" class="form-control input select2">
+                                    </select>
+                                    <span asp-validation-for="CompanyId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+
+                            <div class="col-md-2 pull-left" style="margin: 10px 0;">
+                                <a href="@Url.Action("List", "Branch")" class="btn btn-default col-md-12" data-loading-text="Cancelar...">&nbsp;Cancelar</a>
+                            </div>
+
+                            <div class="col-md-2 pull-right" style="margin: 10px 0;">
+                                <button type="submit" class="btn btn-primary col-md-12">Salvar</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+                @Html.AntiForgeryToken()
+            </div>
+            <!-- Column -->
+        </div>
+    </section>
+    @section Scripts{
+        <script>
+            $('#salesGoal').autoNumeric('init', {
+                aSep: '.',
+                aDec: ',',
+                vMax: '9999999999.99',
+                mDec: '2',
+                vMin: '000'
+            });
+        </script>
+    }
+}
+
