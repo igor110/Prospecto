@@ -1,0 +1,31 @@
+﻿@model Prospecto.Models.MetaMensal
+
+<h2>Cadastrar Meta</h2>
+
+<form asp-action="Create" method="post" class="form-horizontal">
+    <div class="form-group">
+        <label asp-for="MesAno" class="control-label col-md-2">Mês de Referência</label>
+        <div class="col-md-10">
+            <input asp-for="MesAno" class="form-control" type="month" />
+            <span asp-validation-for="MesAno" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="ValorMeta" class="control-label col-md-2">Meta (R$)</label>
+        <div class="col-md-10">
+            <input asp-for="ValorMeta" class="form-control" />
+            <span asp-validation-for="ValorMeta" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Loja" class="control-label col-md-2">Loja (opcional)</label>
+        <div class="col-md-10">
+            <input asp-for="Loja" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-success">Salvar</button>
+        </div>
+    </div>
+</form>

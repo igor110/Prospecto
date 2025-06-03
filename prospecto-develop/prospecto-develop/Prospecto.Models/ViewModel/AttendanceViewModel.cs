@@ -25,6 +25,10 @@ namespace Prospecto.Models.ViewModel
         public BranchViewModel Branch { get; set; }
         public int? BranchId { get; set; }
         public ClientViewModel Client { get; set; }
+        public DateTime? DateNotification { get; set; }
+        public int? NotifyBefore { get; set; } // em minutos, exemplo: 1440 = 1 dia
+
+
         public string StatusDescription
         {
             get

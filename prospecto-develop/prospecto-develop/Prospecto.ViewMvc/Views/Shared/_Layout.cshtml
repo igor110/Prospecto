@@ -74,11 +74,18 @@
                     </a>
                 </div>
                 <ul class="nav navbar-nav">
-    <li>
-        <a href="/Notification/Index" title="Notificações">
-            <i class="fa fa-bell"></i>
-        </a>
-    </li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="notificationDropdownToggle" role="button">
+        <i class="fa fa-bell"></i>
+        <span id="notificationBadge" class="label label-danger" style="display:none;">0</span>
+    </a>
+    <ul class="dropdown-menu" id="notificationList">
+        <li class="text-muted">Carregando...</li>
+    </ul>
+</li>
+
+
+
 </ul>
 
             </nav>
@@ -102,6 +109,7 @@
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index"><i class="fa fa-calendar"></i><span>Agenda</span></a></li>
                         <li><a asp-area="" asp-controller="Attendance" asp-action="List"><i class="fa fa-book"></i> <span>Atendimento</span></a></li>
                         <li><a href="/Attendance/Kanban"><i class="fa fa-columns"></i> <span>Kanban de Atendimentos</span></a></li>
+                        <li><a href="/MetaMensal/Index"><i class="fa fa-bullseye"></i> <span>Metas Mensais</span></a></li>
 
                         if (User.IsInRole(UserTypeEnum.MANAGER.ToString()))
                         {
@@ -227,6 +235,54 @@
     </script>
 
     @RenderSection("Scripts", required: false)
+    <script>
+    function carregarNotificacoes() {
+        fetch('/Notification/ListAttendances')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown = document.getElementById('notificationList');
+                const badge = document.getElementById('notificationBadge');
+
+                if (!dropdown || !badge) return; // evita erro se layout mudar
+
+                dropdown.innerHTML = ""; // limpa
+
+                if (data.length === 0) {
+                    dropdown.innerHTML = "<li class='text-muted'>Nenhuma notificação</li>";
+                    badge.style.display = 'none';
+                } else {
+                    data.forEach(notif => {
+                        const item = document.createElement('li');
+                        item.className = 'dropdown-item';
+                        item.innerHTML = `
+                            <strong>${notif.title}</strong><br/>
+                            <small>${notif.message}</small>
+                        `;
+                        dropdown.appendChild(item);
+                    });
+
+                    badge.textContent = data.length;
+                    badge.style.display = 'inline-block';
+                }
+            })
+            .catch(error => console.error('Erro ao carregar notificações:', error));
+    }
+
+    // Atualiza ao abrir o dropdown
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById('notificationDropdownToggle');
+        if (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                carregarNotificacoes();
+            });
+        }
+
+        // Atualiza a cada minuto automaticamente
+        setInterval(carregarNotificacoes, 60000);
+        carregarNotificacoes(); // executa ao carregar
+    });
+</script>
 
 
 </body>

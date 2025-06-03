@@ -1,106 +1,130 @@
-﻿@using Prospecto.Models.ViewModel
-@model IList<Prospecto.Models.ViewModel.RankingByConsultantViewModel>
+﻿@model Prospecto.Models.ViewModel.DashboardViewModel
 
 @using (Html.BeginForm("Raking", "Home"))
 {
 <section class="content-header">
-    <h1>
-        Dashboard
-    </h1>
+    <h1>Dashboard</h1>
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Dashboard</li>
     </ol>
 </section>
 <section class="content">
+    <!-- NOVA SEÇÃO DASHBOARD ESTILO POWER BI COM DADOS REAIS -->
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-3">
+            <canvas id="gaugeMeta"></canvas>
+        </div>
+        <div class="col-md-9">
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Vendas por consultor</h3>
-
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-                <!-- /.box-header -->
                 <div class="box-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <p class="text-center">
-                                @{
-                                        var dateTime = DateTime.Now.AddMonths(-3);
-                                    <strong>Vendas: @(new DateTime(dateTime.Year, dateTime.Month, 1).ToShortDateString()) até @DateTime.Now.ToShortDateString() </strong>
-                                }
-
-                            </p>
-
-                            <div class="chart">
-                                <!-- Sales Chart Canvas -->
-                                <canvas id="salesChart" style="height: 380px;"></canvas>
-                            </div>
-
+                    <h4><b>RIOPRETO SHOPPING</b></h4>
+                    <p>
+                        <b>Meta JUNHO/25:</b> R$@Model.MetaMensal.ToString("N2") |
+                        <b>Meta dia:</b> R$@((Model.MetaMensal / DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("N2"))
+                    </p>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-info" role="progressbar" style="width:@((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))%">
+                            @((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))% Executado
                         </div>
                     </div>
-                    <!-- /.row -->
+                    <p>
+                        Previsto: <b>R$@Model.Projecao.ToString("N2")</b> |
+                        Executado: <b style="color:red">R$@Model.TotalExecutado.ToString("N2")</b> |
+                        Diferença: <b style="color:red">R$@Model.Diferenca.ToString("N2")</b>
+                    </p>
                 </div>
             </div>
-
-            @{
-                    await Html.RenderPartialAsync("Ranking");
-            }
         </div>
-        <!-- /.col -->
     </div>
-    <!-- /.row -->
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box">
+                <div class="box-body text-center">
+                    <p><b>Meta diária atual:</b> R$@Model.MediaDiaria.ToString("N2")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box">
+                <div class="box-body text-center">
+                    <p><b>Projeção faturamento:</b> R$@Model.Projecao.ToString("N2")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-bordered text-center">
+        <thead>
+            <tr>
+                <th>Vendedor</th>
+                <th>Venda</th>
+                <th>% da Meta</th>
+                <th>Valor Faltante</th>
+                <th>Projeção</th>
+                <th>Meta</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.VendasConsultores)
+            {
+                    var corMeta = item.PercentualMeta >= 100 ? "green" : "red";
+                    var corFaltante = "red";
+                <tr>
+                    <td><i class="fa fa-user"></i> @item.Nome</td>
+                    <td>R$@item.Valor.ToString("N2")</td>
+                    <td style="color:@corMeta">@item.PercentualMeta.ToString("F0")%</td>
+                    <td style="color:@corFaltante">R$@item.ValorFaltante.ToString("N2")</td>
+                    <td>R$@item.Projecao.ToString("N2")</td>
+                    <td>R$@item.MetaConsultor.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </section>
+}
 
-
-@section Scripts{
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel@1.0.3/dist/chartjs-plugin-doughnutlabel.min.js"></script>
+    @{
+        var executado = Model.TotalExecutado.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var meta = Model.MetaMensal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
     <script>
-        $(document).ready(function () {
-            var barChartData;
-            $.ajax({
-                url: "/Home/Dashboard",
-                type: "POST",
-                dataType: "json",
-                data: {},
-                success: function (data) {
-                    if (data.success == true) {
-                        barChartData = data.salesChartData;
+        document.addEventListener("DOMContentLoaded", function () {
+            const executed = parseFloat('@executado');
+            const meta = parseFloat('@meta');
+            const percentual = meta > 0 ? Math.min(100, (executed / meta * 100)).toFixed(0) : 0;
+            const restante = 100 - percentual;
 
-                        new Chart(document.getElementById("salesChart"), {
-                            type: 'bar',
-                            data: barChartData,
-                            options: {
-                                legend: {
-                                    display: true
-                                },
-                                tooltips: {
-                                    callbacks: {
-                                        label: function (context) {
-                                            label = barChartData.datasets[context.datasetIndex].label;
-                                            if (label == undefined)
-                                                label = context.label || '';
-
-                                            if (label) {
-                                                label += ': ';
-                                            }
-                                            if (context.yLabel !== null) {
-                                                label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.yLabel);
-                                            }
-                                            return label;
-                                        }
-                                    }
-                                }
-                            }
-                        });
+            const ctx = document.getElementById('gaugeMeta')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Executado', 'Restante'],
+                        datasets: [{
+                            data: [percentual, restante],
+                            backgroundColor: ['#00c0ef', '#C0C0C0'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        cutout: '75%',
+                        plugins: {
+                            doughnutlabel: {
+                                labels: [
+                                    { text: percentual + '%', font: { size: 20 } },
+                                    { text: 'Executado' }
+                                ]
+                            },
+                            legend: { display: false }
+                        }
                     }
-                }
-            });
+                });
+            }
         });
     </script>
-}
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Prospecto.Data.Configuration;
+using Prospecto.Models;
 using Prospecto.Models.DTO;
 using Prospecto.Models.Enums;
 using Prospecto.Models.Infos;
@@ -11,7 +12,7 @@ namespace Prospecto.Data
         public DbSet<NotificationDTO> Notifications { get; set; }
 
         public ProspectoContext(DbContextOptions<ProspectoContext> options) : base(options) { }
-
+        public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<CompanyInfo> Companies { get; set; }
         public DbSet<UserInfo> Users { get; set; }
         public DbSet<AttendanceInfo> Attendances { get; set; }

@@ -189,6 +189,25 @@ namespace Prospecto.Service
             await Insert(dtoNew);
             return true;
         }
+        public IList<NotificationViewModel> GetPendingNotifications(int userId)
+        {
+            var now = DateTime.Now;
+
+            return _repository
+                .GetQuery(x =>
+                    x.NotifyBefore != null &&
+                    x.UserId == userId &&
+                    x.DateReturn > now &&
+                    EF.Functions.DateDiffMinute(now, x.DateReturn) <= x.NotifyBefore)
+                .Select(x => new NotificationViewModel
+                {
+                    Id = x.Id,
+                    Title = "Retorno Agendado",
+                    Message = $"Cliente: {x.NameClient} - Retorno em {x.DateReturn:dd/MM/yyyy HH:mm}",
+                    Date = x.DateReturn
+                })
+                .ToList();
+        }
 
         public SalesChartDataViewModel SaleByConsultant(SalesChartDataLabelFiltersViewModel filters)
         {
@@ -286,6 +305,27 @@ namespace Prospecto.Service
             return list;
         }
 
+        public IList<NotificationViewModel> ListNotifications()
+        {
+            var now = DateTime.Now;
+
+            return _repository
+                .GetQuery(x => x.NotifyBefore != null)
+                .Include(x => x.Client) // garantir que temos acesso a x.Client.Name
+                .Where(x =>
+                    x.DateReturn > now &&
+                    EF.Functions.DateDiffMinute(now, x.DateReturn) <= x.NotifyBefore)
+                .Select(x => new NotificationViewModel
+                {
+                    Id = x.Id,
+                    Title = "Retorno Agendado",
+                    Message = $"Cliente: {x.Client.Name} - Retorno em {x.DateReturn:dd/MM/yyyy HH:mm}",
+                    Date = x.DateReturn
+                })
+                .ToList();
+        }
+
+
         public override async Task<ResultContent> Delete(int id)
         {
 
@@ -328,4 +368,5 @@ namespace Prospecto.Service
             return lstSecheduleService;
         }
     }
+
 }

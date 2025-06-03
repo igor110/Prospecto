@@ -33,6 +33,7 @@ namespace Prospecto.Models.Mapper
             CreateMap<AttendanceDTO, AttendanceInfo>().Ignore(x => x.Id);
             CreateMap<AttendanceInfo, AttendanceDTO>();
             CreateMap<AttendanceViewModel, AttendanceDTO>();
+            CreateMap<AttendanceViewModel, AttendanceDTO>().ReverseMap();
             #endregion
 
             #region CLIENT

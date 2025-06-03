@@ -105,7 +105,7 @@ namespace Prospecto.ViewMvc.Controllers
             }
             catch (Exception)
             {
-                return RedirectToAction("~/Shared/Error");
+                return RedirectToAction("Error", "Shared");
             }
         }
 
@@ -115,7 +115,7 @@ namespace Prospecto.ViewMvc.Controllers
 
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("~/Shared/Error");
+                return RedirectToAction("Error", "Shared");
             }
 
             attendanceViewModel.Id = await SaveAttendance(attendanceViewModel);
@@ -235,7 +235,7 @@ namespace Prospecto.ViewMvc.Controllers
             if (!IsAuthenticate()) return Redirect("/Account/Login");
             if (!ModelState.IsValid)
             {
-                return RedirectToAction("~/Shared/Error");
+                return RedirectToAction("Error", "Shared");
             }
 
             attendanceViewModel.Id = await SaveAttendance(attendanceViewModel);
@@ -355,7 +355,7 @@ namespace Prospecto.ViewMvc.Controllers
                 if (!IsAuthenticate()) return Redirect("/Account/Login");
                 if (!ModelState.IsValid)
                 {
-                    return RedirectToAction("~/Shared/Error");
+                    return RedirectToAction("Error", "Shared");
                 }
 
                 attendanceViewModel.Id = await SaveAttendance(attendanceViewModel);
@@ -364,7 +364,7 @@ namespace Prospecto.ViewMvc.Controllers
             }
             catch (Exception)
             {
-                return RedirectToAction("~/Shared/Error");
+                return RedirectToAction("Error", "Shared");
             }
         }
 

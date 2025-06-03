@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Prospecto.Data;
 using Prospecto.Mail.Interfaces;
 using Prospecto.Models.Enums;
 using Prospecto.Models.ViewModel;
@@ -8,6 +10,11 @@ using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Models;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Prospecto.ViewMvc.Controllers
 {
@@ -17,44 +24,93 @@ namespace Prospecto.ViewMvc.Controllers
         private readonly IAttendanceService _attendanceService;
         private readonly IMailerService _mailerService;
         private readonly IMessageService _messageService;
+        private readonly ProspectoContext _context;
+
 
         public HomeController(
             IMessageService messageService,
             IMailerService mailerService,
             IAttendanceService attendanceService,
-            ILogger<HomeController> logger)
+            ILogger<HomeController> logger,
+            ProspectoContext context) 
         {
             _logger = logger;
             _attendanceService = attendanceService;
             _mailerService = mailerService;
             _messageService = messageService;
+            _context = context;
         }
 
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
-            if (!IsAuthenticate()) return Redirect("/Account/Login");
-            var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var hoje = DateTime.Now;
+            var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
+            var fimMes = inicioMes.AddMonths(1).AddDays(-1);
+            var diasNoMes = DateTime.DaysInMonth(hoje.Year, hoje.Month);
+            var diasCorridos = (hoje - inicioMes).Days + 1;
+            var diasRestantes = diasNoMes - diasCorridos;
 
-            GetContextData();
+            // 1. Meta mensal
+            var meta = await _context.MetasMensais
+                .Where(m => m.MesAno.Month == hoje.Month && m.MesAno.Year == hoje.Year)
+                .Select(m => m.ValorMeta)
+                .FirstOrDefaultAsync();
 
+            // 2. Atendimentos fechados
+            var atendimentos = await _context.Attendances
+                .Include(a => a.User)
+                .Where(a =>
+                    a.Status == StatusAttendancesEnum.CLOSED &&
+                    a.DateClosed != null &&
+                    a.DateClosed >= inicioMes &&
+                    a.DateClosed <= fimMes)
+                .ToListAsync();
 
-            var filters = new RankingByConsultantFiltersViewModel
+            // 3. Total geral
+            var totalExecutado = atendimentos.Sum(a => a.ValueClosed);
+            var mediaDiariaGeral = diasCorridos > 0 ? totalExecutado / diasCorridos : 0;
+            var previsaoGeral = totalExecutado + (mediaDiariaGeral * diasRestantes);
+            var diferenca = meta - totalExecutado;
+
+            // 4. Vendas por consultor
+            var totalConsultores = atendimentos.Select(a => a.UserId).Distinct().Count();
+            var vendasPorConsultor = atendimentos
+                .GroupBy(a => a.User.Name)
+                .Select(g =>
+                {
+                    var soma = g.Sum(x => x.ValueClosed);
+                    var media = diasCorridos > 0 ? soma / diasCorridos : 0;
+                    return new VendaPorConsultor
+                    {
+                        Nome = g.Key,
+                        Valor = soma,
+                        MetaConsultor = totalConsultores > 0 ? meta / totalConsultores : 0,
+                        Projecao = soma + (media * diasRestantes)
+                    };
+                }).ToList();
+
+            foreach (var v in vendasPorConsultor)
             {
-                RakingBeginDate = date,
-                RakingEndDate = new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month), 23, 59, 59)
+                v.PercentualMeta = v.MetaConsultor == 0 ? 0 : (v.Valor / v.MetaConsultor) * 100;
+                v.ValorFaltante = v.MetaConsultor - v.Valor;
+            }
+
+            var viewModel = new DashboardViewModel
+            {
+                MetaMensal = meta,
+                TotalExecutado = totalExecutado,
+                MediaDiaria = mediaDiariaGeral,
+                Projecao = previsaoGeral,
+                Diferenca = diferenca,
+                VendasConsultores = vendasPorConsultor
             };
 
-            if (Role != UserTypeEnum.ADMINISTRATOR.ToString()) filters.CompanyId = CompanyId;
-
-            if (Role == UserTypeEnum.CONSULTANT.ToString())
-                filters.BranchId = BranchId;
-
-            ViewBag.RakingBeginDate = filters.RakingBeginDate;
-            ViewBag.RakingEndDate = filters.RakingEndDate;
-
-            var lstRanking = _attendanceService.RankingByConsultant(filters);
-            return View(lstRanking);
+            return View(viewModel);
         }
+
+
+
 
         public IActionResult Ranking(RankingByConsultantFiltersViewModel filters)
         {

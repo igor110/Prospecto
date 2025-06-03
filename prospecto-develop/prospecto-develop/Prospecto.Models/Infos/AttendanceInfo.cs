@@ -25,6 +25,8 @@ namespace Prospecto.Models.Infos
         public int? BranchId { get; set; }
         public int? ClientId { get; set; }
         public ReschedulingOriginEnum ReschedulingOrigin { get; set; }
+        public int? NotifyBefore { get; set; } // minutos antes do DateReturn para exibir notificação
+
         #endregion
 
         #region Relationships           

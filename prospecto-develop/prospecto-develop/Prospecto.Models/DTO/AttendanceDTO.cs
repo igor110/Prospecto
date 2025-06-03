@@ -23,5 +23,7 @@ namespace Prospecto.Models.DTO
         public int? BranchId { get; set; }
         public int? ClientId { get; set; }
         public bool IsDeleted { get; set; }
+        public int? NotifyBefore { get; set; }
+
     }
 }

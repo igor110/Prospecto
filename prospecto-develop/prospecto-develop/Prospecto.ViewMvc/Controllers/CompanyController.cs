@@ -92,7 +92,7 @@ namespace Prospecto.ViewMvc.Controllers
             }
             catch (System.Exception)
             {
-                return RedirectToAction("~/Shared/Error");
+                return RedirectToAction("Error", "Shared");
             }
         }
 

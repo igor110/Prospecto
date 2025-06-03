@@ -67,19 +67,31 @@
                             </div>
 
                             <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="value">Data Retorno <span style="color: red">*</span></label>
-                                    <input 
-    type="date" 
-    class="form-control" 
-    id="dateReturn" 
-    name="DateReturn" 
-    placeholder="Data Retorno"
-    @(Model.Id > 0 ? "readonly" : null) />
-                                           asp-for="DateReturn" value="@(Model.Id > 0 ? string.Format("{0:yyyy-MM-dd}", Model.DateReturn) : "")">
-                                    <span class="text-danger field-validation-error" style="display: none">Informe uma data corretamente</span>
-                                </div>
+                            <div class="form-group">
+                                <label asp-for="DateReturn">Data Retorno <span style="color: red">*</span></label>
+                                <input type="date"
+                                   class="form-control"
+                                   id="dateReturn"
+                                   name="DateReturn"
+                                   value="@(Model.Id > 0 ? string.Format("{0:yyyy-MM-dd}", Model.DateReturn) : "")"
+                                   @(Model.Id > 0 ? "readonly" : "") />
+                                <span class="text-danger field-validation-error" style="display: none">Informe uma data corretamente</span>
                             </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label asp-for="NotifyBefore">Notificar antes (min)</label>
+                                <input asp-for="NotifyBefore"
+                                       class="form-control"
+                                       type="number"
+                                       min="1"
+                                       placeholder="Ex: 60 = 1h antes" />
+                                <span class="text-danger field-validation-error" style="display: none">Informe um tempo válido para notificação</span>
+                            </div>
+                        </div>
+
+
 
                         </div>
 
