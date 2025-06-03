@@ -9,9 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Prospecto.Data;
 using Prospecto.Filters;
 using Prospecto.Models.Constants;
+using Prospecto.Repository.Interface;
+using Prospecto.Service;
+using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Extensions;
 using System;
 using System.Globalization;
+using Prospecto.Repository;
 
 namespace Prospecto.ViewMvc
 {
@@ -31,6 +35,8 @@ namespace Prospecto.ViewMvc
         {
             services.ConfigureOptions(Configuration);
             services.AddControllers().AddNewtonsoftJson();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationRepository, NotificationRepository>(); // se ainda não existir, criar depois
 
             services.AddDbContextPool<ProspectoContext>(options =>
             {

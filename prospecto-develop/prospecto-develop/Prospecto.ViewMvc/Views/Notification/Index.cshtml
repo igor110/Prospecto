@@ -1,0 +1,12 @@
+﻿@model List<Prospecto.Models.DTO.NotificationDTO>
+
+<h3>Notificações</h3>
+<ul class="list-group">
+    @foreach (var item in Model)
+    {
+        <li class="list-group-item">
+            <b>@item.NotifyDate.ToString("dd/MM/yyyy"):</b> @item.Message
+        </li>
+    }
+</ul>
+
