@@ -10,9 +10,9 @@ namespace Prospecto.Data
     public class ProspectoContext : DbContext
     {
         public DbSet<NotificationDTO> Notifications { get; set; }
+        public DbSet<SystemSettingInfo> SystemSettings { get; set; }
 
         public ProspectoContext(DbContextOptions<ProspectoContext> options) : base(options) { }
-        public DbSet<MetaMensal> MetasMensais { get; set; }
         public DbSet<CompanyInfo> Companies { get; set; }
         public DbSet<UserInfo> Users { get; set; }
         public DbSet<AttendanceInfo> Attendances { get; set; }

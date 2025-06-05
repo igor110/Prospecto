@@ -95,8 +95,9 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="form-group">
-                                        <label asp-for="Client.Name">Cliente <span style="color: red">*</span></label>
-                                        <input type="text" class="form-control" id="client" name="Client.Name" asp-for="Client.Name" placeholder="Cliente">
+                                        <label>Cliente <span style="color: red">*</span></label>
+                                        <input type="text" class="form-control" id="client-search" placeholder="Buscar ou digitar cliente">
+                                        <input type="hidden" id="clientId" name="Client.Id" asp-for="Client.Id" />
                                         <span class="text-danger field-validation-error" style="display: none">Informe o nome do cliente corretamente!</span>
                                     </div>
                                 </div>
@@ -281,5 +282,53 @@
             });
 
         </script>
+        <script>
+            $(function () {
+                $("#client-search").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: "/Client/SearchClients",
+                            data: { term: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return {
+                                        label: item.name + " - " + item.telephone,
+                                        value: item.name,
+                                        data: item
+                                    };
+                                }));
+                            }
+                        });
+                    },
+                    minLength: 2,
+                    select: function (event, ui) {
+                        const c = ui.item.data;
+
+                        // Preenche o campo oculto com o ID
+                        $("#clientId").val(c.id);
+
+                        // Preenche os outros campos do formulário com os dados do cliente
+                        $("#telephone").val(c.telephone);
+                        $("#email").val(c.email);
+                        $("#cpf").val(c.cpf);
+                        $("#cnpj").val(c.cnpj);
+                        $("#typePerson").val(c.typePerson).trigger("change");
+                        $("#address").val(c.address);
+                        $("#number").val(c.number);
+                        $("#complement").val(c.complement);
+                        $("#zipcode").val(c.zipCode);
+                        $("#neighborhood").val(c.neighborhood);
+                        $("#city").val(c.city);
+                    },
+                    change: function (event, ui) {
+                        if (!ui.item) {
+                            // Se o usuário digitou algo que não corresponde a um cliente, limpa o ID
+                            $("#clientId").val("0");
+                        }
+                    }
+                });
+            });
+        </script>
+
     }
 }

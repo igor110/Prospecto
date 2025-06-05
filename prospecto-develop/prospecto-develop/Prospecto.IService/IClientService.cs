@@ -8,5 +8,6 @@ namespace Prospecto.Service.Interface
     public interface IClientService : IServiceBase<ClientDTO, ClientInfo>
     {
         IList<ClientViewModel> ListByFilters(ClientFiltersViewModel filters);
+        IList<ClientInfo> SearchByName(string term);
     }
 }

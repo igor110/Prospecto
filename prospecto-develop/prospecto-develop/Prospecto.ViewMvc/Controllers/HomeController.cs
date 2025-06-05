@@ -12,9 +12,6 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace Prospecto.ViewMvc.Controllers
 {
@@ -46,35 +43,39 @@ namespace Prospecto.ViewMvc.Controllers
         {
             var hoje = DateTime.Now;
             var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
-            var fimMes = inicioMes.AddMonths(1).AddDays(-1);
             var diasNoMes = DateTime.DaysInMonth(hoje.Year, hoje.Month);
             var diasCorridos = (hoje - inicioMes).Days + 1;
             var diasRestantes = diasNoMes - diasCorridos;
 
-            // 1. Meta mensal
-            var meta = await _context.MetasMensais
-                .Where(m => m.MesAno.Month == hoje.Month && m.MesAno.Year == hoje.Year)
-                .Select(m => m.ValorMeta)
+            // 🔎 Obtém o usuário logado
+            var userEmail = User.Identity.Name;
+
+            // 🔁 Busca a meta da filial do usuário (via SalesGoal da Branch)
+            var meta = await _context.Users
+                .Include(u => u.Branch)
+                .Where(u => u.Email == userEmail)
+                .Select(u => u.Branch.SalesGoal)
                 .FirstOrDefaultAsync();
 
-            // 2. Atendimentos fechados
+            // 🗂️ Atendimentos fechados no mês
             var atendimentos = await _context.Attendances
                 .Include(a => a.User)
                 .Where(a =>
                     a.Status == StatusAttendancesEnum.CLOSED &&
                     a.DateClosed != null &&
                     a.DateClosed >= inicioMes &&
-                    a.DateClosed <= fimMes)
+                    a.DateClosed <= hoje)
                 .ToListAsync();
 
-            // 3. Total geral
+            // 📊 Totais gerais
             var totalExecutado = atendimentos.Sum(a => a.ValueClosed);
             var mediaDiariaGeral = diasCorridos > 0 ? totalExecutado / diasCorridos : 0;
             var previsaoGeral = totalExecutado + (mediaDiariaGeral * diasRestantes);
             var diferenca = meta - totalExecutado;
 
-            // 4. Vendas por consultor
+            // 👥 Vendas por consultor
             var totalConsultores = atendimentos.Select(a => a.UserId).Distinct().Count();
+
             var vendasPorConsultor = atendimentos
                 .GroupBy(a => a.User.Name)
                 .Select(g =>
@@ -88,7 +89,8 @@ namespace Prospecto.ViewMvc.Controllers
                         MetaConsultor = totalConsultores > 0 ? meta / totalConsultores : 0,
                         Projecao = soma + (media * diasRestantes)
                     };
-                }).ToList();
+                })
+                .ToList();
 
             foreach (var v in vendasPorConsultor)
             {
@@ -108,6 +110,7 @@ namespace Prospecto.ViewMvc.Controllers
 
             return View(viewModel);
         }
+
 
 
 

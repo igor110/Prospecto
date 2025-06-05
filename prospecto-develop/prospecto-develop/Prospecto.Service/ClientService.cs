@@ -34,6 +34,13 @@ namespace Prospecto.Service
                 .Select(x => x.AsClientViewMode()).ToList();
 
         }
+        public IList<ClientInfo> SearchByName(string term)
+        {
+            return _repository
+                .GetQuery(x => x.Name.Contains(term))
+                .Take(10)
+                .ToList();
+        }
 
     }
 }

@@ -2,87 +2,87 @@
 
 @using (Html.BeginForm("Raking", "Home"))
 {
-<section class="content-header">
-    <h1>Dashboard</h1>
-    <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Dashboard</li>
-    </ol>
-</section>
-<section class="content">
-    <!-- NOVA SEÇÃO DASHBOARD ESTILO POWER BI COM DADOS REAIS -->
-    <div class="row">
-        <div class="col-md-3">
-            <canvas id="gaugeMeta"></canvas>
-        </div>
-        <div class="col-md-9">
-            <div class="box">
-                <div class="box-body">
-                    <h4><b>RIOPRETO SHOPPING</b></h4>
-                    <p>
-                        <b>Meta JUNHO/25:</b> R$@Model.MetaMensal.ToString("N2") |
-                        <b>Meta dia:</b> R$@((Model.MetaMensal / DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("N2"))
-                    </p>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-info" role="progressbar" style="width:@((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))%">
-                            @((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))% Executado
+    <section class="content-header">
+        <h1>Dashboard</h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Dashboard</li>
+        </ol>
+    </section>
+    <section class="content">
+        <!-- NOVA SEÇÃO DASHBOARD ESTILO POWER BI COM DADOS REAIS -->
+        <div class="row">
+            <div class="col-md-3">
+                <canvas id="gaugeMeta"></canvas>
+            </div>
+            <div class="col-md-9">
+                <div class="box">
+                    <div class="box-body">
+                        <h4><b>RIOPRETO SHOPPING</b></h4>
+                        <p>
+                            <b>Meta JUNHO/25:</b> R$@Model.MetaMensal.ToString("N2") |
+                            <b>Meta dia:</b> R$@((Model.MetaMensal / DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month)).ToString("N2"))
+                        </p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width:@((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))%">
+                                @((Model.MetaMensal > 0 ? (Model.TotalExecutado / Model.MetaMensal) * 100 : 0).ToString("F0"))% Executado
+                            </div>
                         </div>
+                        <p>
+                            Previsto: <b>R$@Model.Projecao.ToString("N2")</b> |
+                            Executado: <b style="color:red">R$@Model.TotalExecutado.ToString("N2")</b> |
+                            Diferença: <b style="color:red">R$@Model.Diferenca.ToString("N2")</b>
+                        </p>
                     </div>
-                    <p>
-                        Previsto: <b>R$@Model.Projecao.ToString("N2")</b> |
-                        Executado: <b style="color:red">R$@Model.TotalExecutado.ToString("N2")</b> |
-                        Diferença: <b style="color:red">R$@Model.Diferenca.ToString("N2")</b>
-                    </p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-body text-center">
-                    <p><b>Meta diária atual:</b> R$@Model.MediaDiaria.ToString("N2")</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-body text-center">
+                        <p><b>Meta diária atual:</b> R$@Model.MediaDiaria.ToString("N2")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-body text-center">
+                        <p><b>Projeção faturamento:</b> R$@Model.Projecao.ToString("N2")</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="box">
-                <div class="box-body text-center">
-                    <p><b>Projeção faturamento:</b> R$@Model.Projecao.ToString("N2")</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <table class="table table-bordered text-center">
-        <thead>
-            <tr>
-                <th>Vendedor</th>
-                <th>Venda</th>
-                <th>% da Meta</th>
-                <th>Valor Faltante</th>
-                <th>Projeção</th>
-                <th>Meta</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.VendasConsultores)
-            {
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Vendedor</th>
+                    <th>Venda</th>
+                    <th>% da Meta</th>
+                    <th>Valor Faltante</th>
+                    <th>Projeção</th>
+                    <th>Meta</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.VendasConsultores)
+                {
                     var corMeta = item.PercentualMeta >= 100 ? "green" : "red";
                     var corFaltante = "red";
-                <tr>
-                    <td><i class="fa fa-user"></i> @item.Nome</td>
-                    <td>R$@item.Valor.ToString("N2")</td>
-                    <td style="color:@corMeta">@item.PercentualMeta.ToString("F0")%</td>
-                    <td style="color:@corFaltante">R$@item.ValorFaltante.ToString("N2")</td>
-                    <td>R$@item.Projecao.ToString("N2")</td>
-                    <td>R$@item.MetaConsultor.ToString("N2")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</section>
+                    <tr>
+                        <td><i class="fa fa-user"></i> @item.Nome</td>
+                        <td>R$@item.Valor.ToString("N2")</td>
+                        <td style="color:@corMeta">@item.PercentualMeta.ToString("F0")%</td>
+                        <td style="color:@corFaltante">R$@item.ValorFaltante.ToString("N2")</td>
+                        <td>R$@item.Projecao.ToString("N2")</td>
+                        <td>R$@item.MetaConsultor.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
 }
 
 @section Scripts {
@@ -107,7 +107,7 @@
                         labels: ['Executado', 'Restante'],
                         datasets: [{
                             data: [percentual, restante],
-                            backgroundColor: ['#00c0ef', '#C0C0C0'],
+                            backgroundColor: ['#00c0ef', '#f4f4f4'],
                             borderWidth: 0
                         }]
                     },

@@ -65,45 +65,62 @@
                                     <span class="text-danger field-validation-error" style="display: none">Informe um valor corretamente</span>
                                 </div>
                             </div>
-
-                            <div class="col-md-2">
-                            <div class="form-group">
-                                <label asp-for="DateReturn">Data Retorno <span style="color: red">*</span></label>
-                                <input type="date"
-                                   class="form-control"
-                                   id="dateReturn"
-                                   name="DateReturn"
-                                   value="@(Model.Id > 0 ? string.Format("{0:yyyy-MM-dd}", Model.DateReturn) : "")"
-                                   @(Model.Id > 0 ? "readonly" : "") />
-                                <span class="text-danger field-validation-error" style="display: none">Informe uma data corretamente</span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label asp-for="NotifyBefore">Notificar antes (min)</label>
-                                <input asp-for="NotifyBefore"
-                                       class="form-control"
-                                       type="number"
-                                       min="1"
-                                       placeholder="Ex: 60 = 1h antes" />
-                                <span class="text-danger field-validation-error" style="display: none">Informe um tempo válido para notificação</span>
-                            </div>
-                        </div>
-
-
-
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label asp-for="Observation">Observação  <span style="color: red">*</span></label>
-                                    <textarea class="form-control" asp-for="Observation" required name="Observation" id="observation" rows="5"></textarea>
-                                    <span class="text-danger field-validation-error" style="display: none">Informe um observação corretamente</span>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="DateReturnDate">Data Retorno <span style="color: red">*</span></label>
+                                        <input type="date"
+                                               class="form-control"
+                                               id="DateReturn"
+                                               name="DateReturn"
+                                               value="@(Model.Id > 0 ? string.Format("{0:yyyy-MM-dd}", Model.DateReturn) : "")"
+                                               @(Model.Id > 0 ? "readonly" : "") />
+                                        <span class="text-danger field-validation-error" style="display: none">Informe uma data corretamente</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label asp-for="TimeReturn">Hora Retorno <span style="color: red">*</span></label>
+                                        <input type="time"
+                                               class="form-control"
+                                               id="TimeReturn"
+                                               name="TimeReturn"
+                                               value="@(Model.TimeReturn.HasValue ? Model.TimeReturn.Value.ToString(@"hh\:mm") : "")" />
+                                        <span class="text-danger field-validation-error" style="display: none">Informe uma hora válida</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="enableNotify" />
+                                            Ativar notificação
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4" id="notifySection" style="display: none;">
+                                    <div class="form-group">
+                                        <label asp-for="NotifyAt">Data e hora da notificação</label>
+                                        <input type="datetime-local"
+                                               class="form-control"
+                                               asp-for="NotifyAt"
+                                               id="NotifyAt"
+                                               name="NotifyAt"
+                                               value="@(Model.NotifyAt != null ? Model.NotifyAt?.ToString("yyyy-MM-ddTHH:mm") : "")" />
+                                    </div>
+                                </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label asp-for="Observation">Observação  <span style="color: red">*</span></label>
+                                            <textarea class="form-control" asp-for="Observation" required name="Observation" id="observation" rows="5"></textarea>
+                                            <span class="text-danger field-validation-error" style="display: none">Informe um observação corretamente</span>
+                                        </div>
+                                    </div>
+                                </div>
 
                         <div class="box-footer">
 
@@ -164,8 +181,9 @@
                 var sourceVal = parseInt($('#source :selected').val());
                 var product = $('#product');
                 var value = $('#value');
-                var dateReturn = $('#dateReturn');
+                var dateReturn = $('#DateReturn');
                 var observation = $('#observation');
+                var timeReturn = $('#TimeReturn');
 
                 var count = 0;
 
@@ -224,6 +242,13 @@
                 } else {
                     dateReturn.next()[0].style.display = 'none';
                 }
+                // NOVO BLOCO — validação do TimeReturn
+                if (timeReturn.val() === "" || timeReturn.val() === "--:--") {
+                    count++;
+                    timeReturn.next()[0].style.display = '';
+                } else {
+                    timeReturn.next()[0].style.display = 'none';
+                }
 
                 if (observation.val() <= 0) {
                     count++;
@@ -248,6 +273,29 @@
                 vMin: '000'
             });
         </script>
+<script>
+    $(document).ready(function () {
+        // checkbox sempre começa desmarcado
+        $('#enableNotify').prop('checked', false);
+        $('#notifySection').hide();
+
+        $('#enableNotify').change(function () {
+            if (this.checked) {
+                $('#notifySection').show();
+            } else {
+                $('#notifySection').hide();
+                $('#NotifyAt').val('');
+            }
+        });
+
+        // Se o valor já estiver preenchido (ex: ao editar), mostra e marca o checkbox
+        if ($('#NotifyAt').val()) {
+            $('#enableNotify').prop('checked', true);
+            $('#notifySection').show();
+        }
+    });
+</script>
+</script>
     }
 }
 

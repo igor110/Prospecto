@@ -109,7 +109,7 @@
                         <li><a asp-area="" asp-controller="Schedule" asp-action="Index"><i class="fa fa-calendar"></i><span>Agenda</span></a></li>
                         <li><a asp-area="" asp-controller="Attendance" asp-action="List"><i class="fa fa-book"></i> <span>Atendimento</span></a></li>
                         <li><a href="/Attendance/Kanban"><i class="fa fa-columns"></i> <span>Kanban de Atendimentos</span></a></li>
-                        <li><a href="/MetaMensal/Index"><i class="fa fa-bullseye"></i> <span>Metas Mensais</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("Index", "SystemSetting")">Parâmetros do Sistema</a></li>
 
                         if (User.IsInRole(UserTypeEnum.MANAGER.ToString()))
                         {

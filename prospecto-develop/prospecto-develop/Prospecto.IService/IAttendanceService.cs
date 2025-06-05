@@ -15,7 +15,7 @@ namespace Prospecto.Service.Interface
         IList<NotificationViewModel> ListNotifications();
         AttendanceViewModel GetWithRelations(int id);
         Task<bool> ImportAttendance(IFormFile file);
-        Task<bool> Reschedule(int idAttendace, DateTime date);
+        Task<bool> Reschedule(int idAttendance, DateTime date, TimeSpan? time = null);
         SalesChartDataViewModel SaleByConsultant(SalesChartDataLabelFiltersViewModel filters);
         IList<RankingByConsultantViewModel> RankingByConsultant(RankingByConsultantFiltersViewModel filters);
         IList<ScheduleServiceViewModel> ScheduledService(AttendanceFiltersViewModel filters);

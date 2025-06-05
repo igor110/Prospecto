@@ -169,10 +169,11 @@ namespace Prospecto.Service
 
         }
 
-        public async Task<bool> Reschedule(int idAttendace, DateTime date)
+        public async Task<bool> Reschedule(int idAttendace, DateTime date, TimeSpan? time = null)
         {
             var obj = GetWithRelations(idAttendace);
 
+            // Atualiza status do atendimento original para RESCHEDULED
             var dto = _mapper.Map<AttendanceDTO>(obj);
             dto.Status = StatusAttendancesEnum.RESCHEDULED;
             dto.ClientId = null;
@@ -180,34 +181,46 @@ namespace Prospecto.Service
 
             await Update(idAttendace, dto);
 
+            // Cria novo atendimento com status OPEN e nova data/hora
             var dtoNew = dto;
+            dtoNew.Id = 0; // Força inserção de novo registro
             dtoNew.Status = StatusAttendancesEnum.OPEN;
-            dtoNew.DateReturn = date;
+
+            if (time.HasValue)
+                dtoNew.DateReturn = date.Date.Add(time.Value);
+            else
+                dtoNew.DateReturn = date;
+
             dtoNew.ReschedulingOrigin = 0;
+
             if (dtoNew.BranchId == 0) dtoNew.BranchId = null;
 
             await Insert(dtoNew);
             return true;
         }
+
+
+
         public IList<NotificationViewModel> GetPendingNotifications(int userId)
         {
             var now = DateTime.Now;
 
             return _repository
                 .GetQuery(x =>
-                    x.NotifyBefore != null &&
+                    x.NotifyAt != null &&
+                    x.NotifyAt <= now &&
                     x.UserId == userId &&
-                    x.DateReturn > now &&
-                    EF.Functions.DateDiffMinute(now, x.DateReturn) <= x.NotifyBefore)
+                    x.DateReturn > now)
                 .Select(x => new NotificationViewModel
                 {
                     Id = x.Id,
                     Title = "Retorno Agendado",
                     Message = $"Cliente: {x.NameClient} - Retorno em {x.DateReturn:dd/MM/yyyy HH:mm}",
-                    Date = x.DateReturn
+                    Date = x.NotifyAt.Value
                 })
                 .ToList();
         }
+
 
         public SalesChartDataViewModel SaleByConsultant(SalesChartDataLabelFiltersViewModel filters)
         {
@@ -310,20 +323,21 @@ namespace Prospecto.Service
             var now = DateTime.Now;
 
             return _repository
-                .GetQuery(x => x.NotifyBefore != null)
-                .Include(x => x.Client) // garantir que temos acesso a x.Client.Name
-                .Where(x =>
-                    x.DateReturn > now &&
-                    EF.Functions.DateDiffMinute(now, x.DateReturn) <= x.NotifyBefore)
+                .GetQuery(x =>
+                    x.NotifyAt != null &&
+                    x.NotifyAt <= now &&
+                    x.DateReturn > now)
+                .Include(x => x.Client)
                 .Select(x => new NotificationViewModel
                 {
                     Id = x.Id,
                     Title = "Retorno Agendado",
                     Message = $"Cliente: {x.Client.Name} - Retorno em {x.DateReturn:dd/MM/yyyy HH:mm}",
-                    Date = x.DateReturn
+                    Date = x.NotifyAt.Value
                 })
                 .ToList();
         }
+
 
 
         public override async Task<ResultContent> Delete(int id)

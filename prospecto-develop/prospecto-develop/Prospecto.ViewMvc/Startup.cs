@@ -8,14 +8,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prospecto.Data;
 using Prospecto.Filters;
+using Prospecto.IRespository;
+using Prospecto.IService;
 using Prospecto.Models.Constants;
+using Prospecto.Repository;
 using Prospecto.Repository.Interface;
 using Prospecto.Service;
 using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Extensions;
 using System;
 using System.Globalization;
-using Prospecto.Repository;
+using MySql.Data.MySqlClient;
+
 
 namespace Prospecto.ViewMvc
 {
@@ -37,7 +41,14 @@ namespace Prospecto.ViewMvc
             services.AddControllers().AddNewtonsoftJson();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<INotificationRepository, NotificationRepository>(); // se ainda não existir, criar depois
-
+            services.AddScoped<System.Data.IDbConnection>(sp =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString(ProjectVariableConstants.ProspectoConnectionString);
+                return new MySql.Data.MySqlClient.MySqlConnection(connectionString);
+            });
+            services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+            services.AddScoped<ISystemSettingService, SystemSettingService>();
             services.AddDbContextPool<ProspectoContext>(options =>
             {
                 options.UseMySql(Configuration.GetConnectionString(ProjectVariableConstants.ProspectoConnectionString), new MySqlServerVersion(new Version(8, 0, 17)));

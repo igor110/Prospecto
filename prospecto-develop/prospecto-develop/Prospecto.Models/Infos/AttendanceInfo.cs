@@ -25,8 +25,8 @@ namespace Prospecto.Models.Infos
         public int? BranchId { get; set; }
         public int? ClientId { get; set; }
         public ReschedulingOriginEnum ReschedulingOrigin { get; set; }
-        public int? NotifyBefore { get; set; } // minutos antes do DateReturn para exibir notificação
-
+        public DateTime? NotifyAt { get; set; } // novo campo: data e hora exata da notificação
+                                       
         #endregion
 
         #region Relationships           
@@ -59,6 +59,7 @@ namespace Prospecto.Models.Infos
             ValueClosed = ValueClosed,
             StatusOrder = StatusOrder,
             ReschedulingOrigin = ReschedulingOrigin,
+            NotifyAt = NotifyAt,
             User = new UserViewModel
             {
                 Email = User?.Email,

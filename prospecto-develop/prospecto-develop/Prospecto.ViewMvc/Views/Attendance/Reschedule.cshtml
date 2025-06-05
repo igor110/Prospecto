@@ -34,6 +34,17 @@
                                     <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
                                 </div>
                             </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label asp-for="TimeReturn">Hora Retorno <span style="color: red">*</span></label>
+                                    <input type="time"
+                                           class="form-control"
+                                           id="TimeReturn"
+                                           name="TimeReturn"
+                                           value="@(Model.TimeReturn.HasValue? Model.TimeReturn.Value.ToString(@"hh\:mm") : "")" />
+                                    <span class="text-danger field-validation-error" style="display: none">Informe uma hora válida</span>
+                                </div>
+                            </div>
 
                         </div>
                     </div>

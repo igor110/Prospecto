@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Linq;
+
 
 namespace Prospecto.ViewMvc.Controllers
 {
@@ -121,6 +123,29 @@ namespace Prospecto.ViewMvc.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        //Busca por clientes via nome
+        [HttpGet]
+        public JsonResult SearchClients(string term)
+        {
+            var clients = _clientService.SearchByName(term); // deve retornar List<ClientInfo>
+            return Json(clients.Select(c => new
+            {
+                id = c.Id,
+                name = c.Name,
+                telephone = c.Telephone,
+                email = c.Email,
+                cpf = c.CPF,
+                cnpj = c.CNPJ,
+                typePerson = c.TypePerson,
+                address = c.Address,
+                number = c.Number,
+                complement = c.Complement,
+                zipCode = c.ZipCode,
+                neighborhood = c.Neighborhood,
+                city = c.City
+            }));
         }
     }
 }
