@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
-
+using Prospecto.Models.Request;
 
 
 namespace Prospecto.ViewMvc.Controllers
@@ -262,7 +262,7 @@ namespace Prospecto.ViewMvc.Controllers
 
             TempData["success"] = "Atendimento reagendado com sucesso!";
             return RedirectToAction("Index", "Schedule");
-        
+
         }
 
 
@@ -338,56 +338,41 @@ namespace Prospecto.ViewMvc.Controllers
             ViewData["Title"] = "Kanban de Atendimentos";
             ViewData["Message"] = "Organize seus atendimentos de forma visual.";
 
-            // Filtro de datas padrão
             filters.BeginDate ??= DateTime.Now.AddMonths(-1);
             filters.EndDate ??= DateTime.Now;
             filters.EndDate = filters.EndDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
 
-            // Filtros por permissão
             if (Role != UserTypeEnum.ADMINISTRATOR.ToString())
                 filters.CompanyId = CompanyId;
 
             if (Role == UserTypeEnum.CONSULTANT.ToString())
                 filters.UserId = UserId;
 
-            // Lista de atendimentos
             var atendimentos = _attendanceService.ListByFilters(filters);
 
-            // Parâmetros do funil (SystemSetting)
-            var companyId = User.GetCompanyId();
-            var branchId = User.GetBranchId();
+            // Obtém os status do funil
+            var statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, BranchId);
 
-            var statusList = await _systemSettingService.ListAsync("kanban-status", companyId, branchId);
+            // Fallback para empresa
+            if (!statusList.Any() && BranchId > 0)
+                statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, null);
 
-            // Se não encontrar para filial, tenta só por empresa
-            if (!statusList.Any() && branchId.HasValue)
-                statusList = await _systemSettingService.ListAsync("kanban-status", companyId, null);
+            var statusEtapas = statusList.FirstOrDefault()?.Value?.Split(',')?.Select(s => s.Trim()).ToList() ?? new List<string>();
 
-            // Cria ViewBag com a lista dos nomes
-            var statusDict = statusList.Select(s => s.Value).ToList();
-            ViewBag.KanbanStatus = statusDict;
-
-            // Mapeia Status → StatusLabel (com base no índice)
-            foreach (var a in atendimentos)
+            // Mapeia índice do Status (int) para o nome da etapa
+            foreach (var item in atendimentos)
             {
-                var statusIndex = (int)a.Status;
-                Console.WriteLine($"Atendimento #{a.Id} - Status {(int)a.Status} - Label {(statusDict.ElementAtOrDefault(statusIndex) ?? "Indefinido")}");
-                if (statusIndex >= 0 && statusIndex < statusDict.Count)
-                    a.StatusLabel = statusDict[statusIndex];
-                else
-                    a.StatusLabel = "Indefinido";
+                var index = (int)item.Status;
+                item.StatusLabel = (index >= 0 && index < statusEtapas.Count) ? statusEtapas[index] : "Indefinido";
             }
 
-            // Filtros visuais
+            ViewBag.KanbanStatus = statusEtapas;
             ViewBag.BeginDate = filters.BeginDate;
             ViewBag.EndDate = filters.EndDate;
             ViewBag.TypeDate = filters.TypeDate;
 
             return View(atendimentos);
         }
-
-
-
 
 
         public async Task<IActionResult> Save(AttendanceViewModel attendanceViewModel)
@@ -464,46 +449,45 @@ namespace Prospecto.ViewMvc.Controllers
                 throw new Exception(err.Message);
             }
         }
+
+
         [HttpPost]
-        public JsonResult UpdateStatus(int id, string status)
+        public async Task<JsonResult> UpdateStatus([FromBody] KanbanUpdateRequest request)
         {
             try
             {
-                var mapStatus = status switch
-                {
-                    "Novo" => StatusAttendancesEnum.OPEN,
-                    "Em Atendimento" => StatusAttendancesEnum.RESCHEDULED,
-                    "Aguardando Retorno" => StatusAttendancesEnum.WAITING,
-                    "Concluído" => StatusAttendancesEnum.CLOSED,
-                    _ => StatusAttendancesEnum.OPEN
-                };
+                GetContextData(); // 🔴 ESSENCIAL para que CompanyId e BranchId sejam válidos
 
-                var atendimento = _attendanceService.GetWithRelations(id);
-                if (atendimento != null)
-                {
-                    atendimento.Status = mapStatus;
+                var statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, BranchId);
 
-                    // Faz o mapeamento do ViewModel para DTO
-                    var dto = _mapper.Map<AttendanceDTO>(atendimento);
+                if (!statusList.Any() && BranchId > 0)
+                    statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, null);
 
-                    _attendanceService.Update(id, dto);
+                var statusEtapas = statusList.Select(s => s.Value).ToList();
 
-                    return Json(new { success = true });
-                }
+                var newStatusIndex = statusEtapas
+                    .Select((s, i) => new { Name = s.Trim().ToLower(), Index = i })
+                    .FirstOrDefault(x => x.Name == request.Status?.Trim().ToLower())?.Index ?? -1;
 
-                return Json(new { success = false, message = "Atendimento não encontrado." });
+                if (newStatusIndex == -1)
+                    return Json(new { success = false, message = $"Status inválido: '{request.Status}'" });
+
+                var atendimento = _attendanceService.GetWithRelations(request.Id);
+                if (atendimento == null)
+                    return Json(new { success = false, message = "Atendimento não encontrado." });
+
+                atendimento.Status = (StatusAttendancesEnum)newStatusIndex;
+                var dto = _mapper.Map<AttendanceDTO>(atendimento);
+                await _attendanceService.Update(request.Id, dto);
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Erro: {ex.Message}" });
             }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
-
 }
+

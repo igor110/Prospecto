@@ -4,36 +4,107 @@
     var statusList = ViewBag.KanbanStatus as List<string> ?? new List<string> { "Aberto", "Fechado" };
 }
 
-<div class="kanban-board row">
+<style>
+    .kanban-board {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+    }
+
+    .kanban-column {
+        background: #f4f4f4;
+        border-radius: 8px;
+        padding: 1rem;
+        min-width: 300px;
+        flex: 1;
+    }
+
+        .kanban-column .card {
+            cursor: grab;
+        }
+
+        .kanban-column.over {
+            border: 2px dashed #007bff;
+        }
+
+    .kanban-card {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="kanban-board">
     @foreach (var status in statusList)
     {
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
+        <div class="kanban-column" data-status="@status" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="card text-white bg-primary mb-2">
+                <div class="card-body">
                     <strong>@status</strong>
                 </div>
-                <div class="card-body kanban-column" data-status="@status">
-                    @foreach (var item in Model.Where(a => a.StatusLabel == status))
+            </div>
+
+            @foreach (var item in Model.Where(a => a.StatusLabel == status))
+            {
+                <div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
+                    <p><strong>@item.NameClient</strong></p>
+                    <p>@item.Telephone</p>
+                    @if (item.DateReturn > DateTime.MinValue)
                     {
-                        <div class="kanban-card card mb-2" data-id="@item.Id">
-                            <div class="card-body">
-                                <p><strong>@item.NameClient</strong></p>
-                                <p>@item.Telephone</p>
-                                @if (item.DateReturn > DateTime.MinValue)
-                                {
-                                    <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
-                                }
-                            </div>
-                        </div>
+                        <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
                     }
                 </div>
-            </div>
+            }
         </div>
     }
 </div>
 
 @section Scripts {
     <script>
-        // Código JS futuro para drag-and-drop ou interação
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.getAttribute("data-id"));
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+
+            const targetColumn = ev.currentTarget;
+            let status = targetColumn.getAttribute("data-status");
+
+            // 🔍 Remove aspas e espaços desnecessários
+            status = status.replace(/^['"]+|['"]+$/g, '').trim();
+
+            const draggedCard = document.querySelector('[data-id="' + id + '"]');
+            if (draggedCard && targetColumn !== draggedCard.parentNode) {
+                targetColumn.appendChild(draggedCard);
+            }
+
+            fetch('/Attendance/UpdateStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: parseInt(id),
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Erro ao atualizar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+            });
+        }
     </script>
 }

@@ -30,26 +30,25 @@ namespace Prospecto.Repository
             sql.AppendLine("WHERE 1 = 1");
 
             if (!string.IsNullOrEmpty(keyFilter))
-                sql.AppendLine("AND ss.Key = @Key");
-
+                sql.AppendLine("AND ss.`Key` = @Key");
             if (companyId.HasValue)
                 sql.AppendLine("AND ss.CompanyId = @CompanyId");
-
             if (branchId.HasValue)
                 sql.AppendLine("AND ss.BranchId = @BranchId");
 
-            var result = await _connection.QueryAsync<SystemSettingInfo>(
-                sql.ToString(),
-                new
-                {
-                    Key = keyFilter,
-                    CompanyId = companyId,
-                    BranchId = branchId
-                }
-            );
+            var parametros = new { Key = keyFilter, CompanyId = companyId, BranchId = branchId };
 
-            return result;
+            System.Diagnostics.Debug.WriteLine($"📥 SQL Executado:\n{sql}");
+            System.Diagnostics.Debug.WriteLine($"📥 Parâmetros:\nKey={keyFilter}, CompanyId={companyId}, BranchId={branchId}");
+
+            var resultado = await _connection.QueryAsync<SystemSettingInfo>(sql.ToString(), parametros);
+
+            foreach (var item in resultado)
+                System.Diagnostics.Debug.WriteLine($"🔄 Parametro retornado: {item.Key} = {item.Value}");
+
+            return resultado;
         }
+
         public async Task<IEnumerable<SystemSettingInfo>> ListAllAsync(int companyId, int? branchId)
         {
             var sql = new StringBuilder();

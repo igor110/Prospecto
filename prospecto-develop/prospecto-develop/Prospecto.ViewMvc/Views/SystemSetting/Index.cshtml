@@ -31,7 +31,7 @@
             {
                 <tr>
                     <td>@item.CompanyName</td>
-                    <td>@item.BranchName</td>
+                    <td>@(string.IsNullOrEmpty(item.BranchName) ? "Todas as Filiais" : item.BranchName)</td>
                     <td>@item.Key</td>
                     <td>@item.Value</td>
                     <td>
