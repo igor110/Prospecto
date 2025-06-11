@@ -24,6 +24,6 @@ namespace Prospecto.Models.DTO
         public int? ClientId { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime? NotifyAt { get; set; }
-
+        public int? StatusKanban { get; set; }
     }
 }

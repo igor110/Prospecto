@@ -2,14 +2,13 @@
 @{
     ViewData["Title"] = "Kanban de Atendimentos";
     var statusList = ViewBag.KanbanStatus as List<string> ?? new List<string> { "Aberto", "Fechado" };
+    var index = 0;
 }
 
 @using (Html.BeginForm("Kanban", "Attendance", FormMethod.Post))
 {
     <section class="content-header">
-        <h1>
-            @ViewData["Title"]
-        </h1>
+        <h1>@ViewData["Title"]</h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
             <li class="active">Kanban</li>
@@ -24,8 +23,7 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="TypeDate">Tipo de data</label>
-                                <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control">
-                                </select>
+                                <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control"></select>
                             </div>
                         </div>
 
@@ -62,8 +60,9 @@
 
                     <div class="box-body">
                         <div class="kanban-board">
-                            @foreach (var status in statusList)
+                            @for (int i = 0; i < statusList.Count; i++)
                             {
+                                var status = statusList[i];
                                 <div class="kanban-column" data-status="@status" ondrop="drop(event)" ondragover="allowDrop(event)">
                                     <div class="card text-white bg-primary mb-2">
                                         <div class="card-body">
@@ -71,7 +70,7 @@
                                         </div>
                                     </div>
 
-                                    @foreach (var item in Model.Where(a => a.StatusLabel == status))
+                                    @foreach (var item in Model.Where(a => a.StatusKanban == i))
                                     {
                                         <div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
                                             <p><strong>@item.NameClient</strong></p>
@@ -106,7 +105,7 @@
             ev.preventDefault();
             const id = ev.dataTransfer.getData("text");
             const targetColumn = ev.currentTarget;
-            let status = targetColumn.getAttribute("data-status").replace(/^['"]+|['"]+$/g, '').trim();
+            let status = targetColumn.getAttribute("data-status").trim().toLowerCase();
 
             const draggedCard = document.querySelector('[data-id="' + id + '"]');
             if (draggedCard && targetColumn !== draggedCard.parentNode) {
@@ -125,4 +124,14 @@
             .catch(error => console.error('Erro:', error));
         }
     </script>
+
+    <style>
+        .kanban-column .card-body {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 10px;
+            text-transform: uppercase;
+        }
+    </style>
 }

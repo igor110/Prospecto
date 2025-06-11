@@ -26,7 +26,8 @@ namespace Prospecto.Models.Infos
         public int? ClientId { get; set; }
         public ReschedulingOriginEnum ReschedulingOrigin { get; set; }
         public DateTime? NotifyAt { get; set; } // novo campo: data e hora exata da notificação
-                                       
+        public int? StatusKanban { get; set; }
+
         #endregion
 
         #region Relationships           
@@ -60,6 +61,9 @@ namespace Prospecto.Models.Infos
             StatusOrder = StatusOrder,
             ReschedulingOrigin = ReschedulingOrigin,
             NotifyAt = NotifyAt,
+            StatusKanban = StatusKanban,
+            ClientId = this.Client != null && this.Client.Id > 0 ? this.Client.Id : (int?)null,
+
             User = new UserViewModel
             {
                 Email = User?.Email,

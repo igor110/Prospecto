@@ -12,6 +12,14 @@
     flex: 1;
 }
 
+.kanban-column-header {
+    text-align: center;
+    font-weight: bold;
+    background-color: #337ab7;
+    color: white;
+    padding: 5px;
+}
+
     .kanban-column .card {
         cursor: grab;
     }

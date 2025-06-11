@@ -1,4 +1,5 @@
-﻿@using Prospecto.Models.Enums;
+﻿
+@using Prospecto.Models.Enums;
 @using System.Security.Claims;
 
 <!DOCTYPE html>
@@ -74,23 +75,19 @@
                     <a class="navbar-brand" href="../">
                     </a>
                 </div>
-                <ul class="nav navbar-nav">
-<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="notificationDropdownToggle" role="button">
-        <i class="fa fa-bell"></i>
-        <span id="notificationBadge" class="label label-danger" style="display:none;">0</span>
-    </a>
-    <ul class="dropdown-menu" id="notificationList">
-        <li class="text-muted">Carregando...</li>
-    </ul>
-</li>
-
-
-
-</ul>
-
+                 <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="notificationDropdownToggle" role="button">
+                            <i class="fa fa-bell"></i>
+                            <span id="notificationBadge" class="label label-danger" style="display:none;">0</span>
+                        </a>
+                        <ul class="dropdown-menu" id="notificationList">
+                            <li class="text-muted">Carregando...</li>
+                        </ul>
+                    </li>
+                </ul>
             </nav>
-        </header>
+    </header>
 
         <aside class="main-sidebar">
             <section class="sidebar">
@@ -255,10 +252,10 @@
                     data.forEach(notif => {
                         const item = document.createElement('li');
                         item.className = 'dropdown-item';
-                        item.innerHTML = `
+                        item.innerHTML = 
                             <strong>${notif.title}</strong><br/>
                             <small>${notif.message}</small>
-                        `;
+                        ;
                         dropdown.appendChild(item);
                     });
 

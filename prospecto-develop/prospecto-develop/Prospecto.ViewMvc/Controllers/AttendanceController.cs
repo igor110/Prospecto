@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Prospecto.IService;
 using Prospecto.Models.DTO;
 using Prospecto.Models.Enums;
+using Prospecto.Models.Request;
 using Prospecto.Models.ViewModel;
 using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Extensions; // Para User.GetCompanyId()
@@ -12,9 +14,8 @@ using Prospecto.ViewMvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Linq;
-using Prospecto.Models.Request;
+using System.Threading.Tasks;
 
 
 namespace Prospecto.ViewMvc.Controllers
@@ -323,6 +324,18 @@ namespace Prospecto.ViewMvc.Controllers
             if (dto.BranchId == 0)
                 dto.BranchId = null;
 
+            Console.WriteLine("========== DEBUG DTO ==========");
+            Console.WriteLine($"ID: {dto.Id}");
+            Console.WriteLine($"NameClient: {dto.NameClient}");
+            Console.WriteLine($"CompanyId: {dto.CompanyId}");
+            Console.WriteLine($"BranchId: {dto.BranchId}");
+            Console.WriteLine($"UserId: {dto.UserId}");
+            Console.WriteLine($"DateRegistred: {dto.DateRegistred}");
+            Console.WriteLine($"DateReturn: {dto.DateReturn}");
+            Console.WriteLine($"Status: {dto.Status}");
+            Console.WriteLine($"StatusKanban: {dto.StatusKanban}");
+            Console.WriteLine("================================");
+
             await _attendanceService.Update(AttendanceViewModel.Id, dto);
 
             TempData["success"] = "Atendimento fechado com sucesso!";
@@ -338,40 +351,49 @@ namespace Prospecto.ViewMvc.Controllers
             ViewData["Title"] = "Kanban de Atendimentos";
             ViewData["Message"] = "Organize seus atendimentos de forma visual.";
 
+            // Define datas padrão
             filters.BeginDate ??= DateTime.Now.AddMonths(-1);
             filters.EndDate ??= DateTime.Now;
             filters.EndDate = filters.EndDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
 
+            // Restrições de empresa e usuário
             if (Role != UserTypeEnum.ADMINISTRATOR.ToString())
                 filters.CompanyId = CompanyId;
 
             if (Role == UserTypeEnum.CONSULTANT.ToString())
                 filters.UserId = UserId;
 
+            // Carrega atendimentos com filtros aplicados
             var atendimentos = _attendanceService.ListByFilters(filters);
 
-            // Obtém os status do funil
+            // Obtém os status do funil (SystemSetting: "kanban-status")
             var statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, BranchId);
 
-            // Fallback para empresa
+            // Fallback: buscar status definidos apenas por empresa
             if (!statusList.Any() && BranchId > 0)
                 statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, null);
 
-            var statusEtapas = statusList.FirstOrDefault()?.Value?.Split(',')?.Select(s => s.Trim()).ToList() ?? new List<string>();
+            // Divide os status em uma lista ordenada (com base no valor do parâmetro)
+            var statusEtapas = statusList
+                .FirstOrDefault()?.Value?
+                .Split(',')?
+                .Select(s => s.Trim())
+                .ToList() ?? new List<string>();
 
+            // Garante que apenas atendimentos com StatusKanban válido sejam considerados
             foreach (var item in atendimentos)
             {
-                var index = (int)item.Status;
-                item.StatusLabel = (index >= 0 && index < statusEtapas.Count) ? statusEtapas[index] : "Indefinido";
+                if (item.StatusKanban is null || item.StatusKanban < 0 || item.StatusKanban >= statusEtapas.Count)
+                    item.StatusKanban = null; // ou defina um valor padrão se desejar
             }
 
-            // 🔧 Adicione isso:
+            // Dropdown de tipo de data (para filtros)
             ViewBag.listTypeDate = new List<SelectListItem>
-    {
-        new SelectListItem { Text = "Data de Cadastro", Value = "registered" },
-        new SelectListItem { Text = "Data de Retorno", Value = "return" }
-    };
-
+                {
+                    new SelectListItem { Value = "1", Text = "Data registro", Selected = filters.TypeDate == 1 },
+                    new SelectListItem { Value = "2", Text = "Data retorno", Selected = filters.TypeDate == 2 },
+                    new SelectListItem { Value = "3", Text = "Data fechamento", Selected = filters.TypeDate == 3 }
+                };
             ViewBag.KanbanStatus = statusEtapas;
             ViewBag.BeginDate = filters.BeginDate;
             ViewBag.EndDate = filters.EndDate;
@@ -379,8 +401,6 @@ namespace Prospecto.ViewMvc.Controllers
 
             return View(atendimentos);
         }
-
-
 
         public async Task<IActionResult> Save(AttendanceViewModel attendanceViewModel)
         {
@@ -463,18 +483,26 @@ namespace Prospecto.ViewMvc.Controllers
         {
             try
             {
-                GetContextData(); // 🔴 ESSENCIAL para que CompanyId e BranchId sejam válidos
+                GetContextData();
 
                 var statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, BranchId);
-
                 if (!statusList.Any() && BranchId > 0)
                     statusList = await _systemSettingService.ListAsync("kanban-status", CompanyId, null);
 
-                var statusEtapas = statusList.Select(s => s.Value).ToList();
+                string Normalize(string value) => value?.Trim().ToLower().Replace("ç", "c").Replace("á", "a").Replace("é", "e");
+
+                var statusEtapas = statusList
+                    .FirstOrDefault()?.Value?
+                    .Split(',')?
+                    .Select(s => Normalize(s))
+                    .ToList() ?? new List<string>();
+
+                var normalizedStatus = Normalize(request.Status);
 
                 var newStatusIndex = statusEtapas
-                    .Select((s, i) => new { Name = s.Trim().ToLower(), Index = i })
-                    .FirstOrDefault(x => x.Name == request.Status?.Trim().ToLower())?.Index ?? -1;
+                    .Select((s, i) => new { Name = s, Index = i })
+                    .FirstOrDefault(x => x.Name == normalizedStatus)?.Index ?? -1;
+
 
                 if (newStatusIndex == -1)
                     return Json(new { success = false, message = $"Status inválido: '{request.Status}'" });
@@ -483,7 +511,11 @@ namespace Prospecto.ViewMvc.Controllers
                 if (atendimento == null)
                     return Json(new { success = false, message = "Atendimento não encontrado." });
 
-                atendimento.Status = (StatusAttendancesEnum)newStatusIndex;
+                atendimento.StatusKanban = newStatusIndex;
+
+                if (atendimento.BranchId == 0)
+                    atendimento.BranchId = null;
+
                 var dto = _mapper.Map<AttendanceDTO>(atendimento);
                 await _attendanceService.Update(request.Id, dto);
 
@@ -491,7 +523,12 @@ namespace Prospecto.ViewMvc.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Erro: {ex.Message}" });
+                return Json(new
+                {
+                    success = false,
+                    message = $"Erro completo: {ex.Message}\n\nStackTrace: {ex.StackTrace}\n\nInner: {(ex.InnerException?.Message ?? "sem inner exception")}"
+
+            });
             }
         }
 

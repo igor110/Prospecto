@@ -8,6 +8,7 @@ using Prospecto.Models.Extensions;
 using Prospecto.Models.Infos;
 using Prospecto.Models.Result;
 using Prospecto.Models.ViewModel;
+using Prospecto.Repository;
 using Prospecto.Respository.Interface;
 using Prospecto.Service.Interface;
 using System;
@@ -381,6 +382,17 @@ namespace Prospecto.Service
 
             return lstSecheduleService;
         }
-    }
 
+        public void UpdateStatusKanban(int id, int newStatus)
+        {
+            var atendimentoViewModel = GetWithRelations(id);
+            if (atendimentoViewModel == null)
+                throw new Exception("Atendimento não encontrado");
+
+            atendimentoViewModel.StatusKanban = newStatus;
+
+            var atendimentoDTO = _mapper.Map<AttendanceDTO>(atendimentoViewModel);
+            Update(id, atendimentoDTO);
+        }
+    }
 }

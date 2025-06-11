@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "admin-lte": "^3.2.0",
     "iterable": "^5.7.0",
     "jquery.promise": "^2.0.0",
     "moment": "^2.30.1",
@@ -7,6 +8,7 @@
   },
   "devDependencies": {
     "@types/jquery": "^3.5.7",
-    "@types/moment": "^2.11.29"
+    "@types/moment": "^2.11.29",
+    "husky": "^9.1.7"
   }
 }

@@ -29,6 +29,8 @@ namespace Prospecto.Models.ViewModel
         public DateTime? NotifyAt { get; set; } // novo campo: data e hora exata da notificação
         public TimeSpan? TimeReturn { get; set; } // novo campo auxiliar
         public string StatusLabel { get; set; }
+        public int? StatusKanban { get; set; } = 0; // campo de status do kanban
+        public int? ClientId { get; set; }
 
 
         public string StatusDescription
