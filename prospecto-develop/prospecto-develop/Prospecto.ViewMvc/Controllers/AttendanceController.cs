@@ -238,6 +238,7 @@ namespace Prospecto.ViewMvc.Controllers
             return View("List", obj);
         }
 
+
         public async Task<IActionResult> ReschedulePartial(AttendanceViewModel attendanceViewModel)
         {
             if (!IsAuthenticate()) return Redirect("/Account/Login");
@@ -262,7 +263,7 @@ namespace Prospecto.ViewMvc.Controllers
             var result = await _attendanceService.Reschedule(AttendanceViewModel.Id, date, AttendanceViewModel.TimeReturn);
 
             TempData["success"] = "Atendimento reagendado com sucesso!";
-            return RedirectToAction("Index", "Schedule");
+            return RedirectToAction("List", "Attendance");
 
         }
 
@@ -316,30 +317,17 @@ namespace Prospecto.ViewMvc.Controllers
                 else
                 {
                     TempData["error"] = "Erro ao salvar o cliente.";
-                    return RedirectToAction("Index", "Schedule");
+                    return RedirectToAction("List", "Attendance");
                 }
             }
 
             // Finaliza o atendimento
             if (dto.BranchId == 0)
                 dto.BranchId = null;
-
-            Console.WriteLine("========== DEBUG DTO ==========");
-            Console.WriteLine($"ID: {dto.Id}");
-            Console.WriteLine($"NameClient: {dto.NameClient}");
-            Console.WriteLine($"CompanyId: {dto.CompanyId}");
-            Console.WriteLine($"BranchId: {dto.BranchId}");
-            Console.WriteLine($"UserId: {dto.UserId}");
-            Console.WriteLine($"DateRegistred: {dto.DateRegistred}");
-            Console.WriteLine($"DateReturn: {dto.DateReturn}");
-            Console.WriteLine($"Status: {dto.Status}");
-            Console.WriteLine($"StatusKanban: {dto.StatusKanban}");
-            Console.WriteLine("================================");
-
             await _attendanceService.Update(AttendanceViewModel.Id, dto);
 
             TempData["success"] = "Atendimento fechado com sucesso!";
-            return RedirectToAction("Index", "Schedule");
+            return RedirectToAction("List", "Attendance");
         }
 
 
@@ -414,7 +402,9 @@ namespace Prospecto.ViewMvc.Controllers
 
                 attendanceViewModel.Id = await SaveAttendance(attendanceViewModel);
                 TempData["success"] = "Atendimento salvo com sucesso!";
-                return RedirectToAction("Index", "Attendance", new { attendanceViewModel.Id });
+                //return RedirectToAction("Index", "Attendance", new { attendanceViewModel.Id }); PERMANECIA EM EDIÇÃO COM O ULTIMO ATENDIMENTO
+                return RedirectToAction("List", "Attendance");
+
             }
             catch (Exception)
             {

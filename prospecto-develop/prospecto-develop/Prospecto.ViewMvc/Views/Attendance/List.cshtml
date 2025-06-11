@@ -18,34 +18,35 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="ReschedulingOrigin">Tipo de data</label>
-                                <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control">
-                                </select>
+                                <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control"></select>
                             </div>
                         </div>
 
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label for="value">Data Inicio </label>
+                                <label for="BeginDate">Data Início</label>
                                 <input type="date" class="form-control" id="BeginDate" name="BeginDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.BeginDate))">
-                                <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
                             </div>
                         </div>
 
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label for="EndDate">Data Fim </label>
+                                <label for="EndDate">Data Fim</label>
                                 <input type="date" class="form-control" id="EndDate" name="EndDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.EndDate))">
-                                <span class="glyphicon glyphicon-remove form-control input-sm-feedback" style="display: none"></span>
                             </div>
                         </div>
 
                         <div class="col-md-2">
-                            <button style="margin-top: 25px;" type="submit" formaction="ListPartial" class="btn btn-default col-md-12"><span class="fa fa-filter"></span>&nbsp;Filtrar</button>
+                            <button style="margin-top: 25px;" type="submit" formaction="ListPartial" class="btn btn-default col-md-12">
+                                <span class="fa fa-filter"></span>&nbsp;Filtrar
+                            </button>
                         </div>
 
                         <div class="col-md-2">
                             <div class="btn-group pull-right" style="margin-top: 25px;">
-                                <a class="btn btn-primary" href="@Url.Action("Index", "Attendance")" id="BotaoCriar"><span class="fa fa-plus"></span>&nbsp;Adicionar</a>
+                                <a class="btn btn-primary" href="@Url.Action("Index", "Attendance")" id="BotaoCriar">
+                                    <span class="fa fa-plus"></span>&nbsp;Adicionar
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -66,7 +67,8 @@
             </div>
         </div>
     </section>
-    @section Scripts{
+
+    @section Scripts {
         <script>
             $('#tableAttendance').DataTable({
                 dom: 'B<"top col-md-3 pull-right"f>rt<"bottom"<"col-md-2 pull-left"l><"col-md-3"i><"col-md-7"p>><"clear">',
@@ -74,7 +76,7 @@
                     extend: "excel",
                     className: "btn-sm",
                     text: 'Excel',
-                }],             
+                }],
                 'iDisplayLength': 25,
                 'paging': true,
                 'responsive': true,
@@ -88,55 +90,21 @@
                     "sLengthMenu": 'Mostrar <select><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> registros.',
                     "sSearch": "Pesquisar:",
                     "sInfo": "Exibindo (_START_ de _END_) do(s) _TOTAL_ registro(s).",
-                    "sZeroRecords": "Nenhum registro econtrado.",
+                    "sZeroRecords": "Nenhum registro encontrado.",
                     "oPaginate": {
                         "sLast": "Última Página",
                         "sFirst": "Primeira Página",
                         "sNext": "Próxima",
                         "sPrevious": "Anterior"
                     }
-                },
-                "footerCallback": function ( row, data, start, end, display ) {
-                    var api = this.api(), data;
- 
-                    // Remove the formatting to get integer data for summation
-                    var intVal = function ( i ) {
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '')*1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
- 
-                    // Total over all pages
-                    total = api
-                        .column( 4 )
-                        .data()
-                        .reduce( function (a, b) {
-                            return intVal(a) + intVal(b);
-                        }, 0 );
- 
-                    // Total over this page
-                    pageTotal = api
-                        .column( 4, { page: 'current'} )
-                        .data()
-                        .reduce( function (a, b) {
-                            return intVal(a) + intVal(b);
-                        }, 0 );
- 
-                    // Update footer
-                    $( api.column( 4 ).footer() ).html(
-                        '$'+pageTotal +' ( $'+ total +' total)'
-                    );
                 }
-            })
-
-            $("#tableAttendance tbody tr").on("dblclick", function (event) {
-                var id = this.cells[0].id;
-                if (id != "")
-                    window.location.href = "@Url.Action("Index", "Attendance")/"+id+"";
             });
 
+            $("#tableAttendance tbody").on("dblclick", function (event) {
+                var id = this.cells[0].id;
+                if (id != "")
+                    window.location.href = "@Url.Action("Index", "Attendance")/" + id;
+            });
         </script>
     }
-
 }

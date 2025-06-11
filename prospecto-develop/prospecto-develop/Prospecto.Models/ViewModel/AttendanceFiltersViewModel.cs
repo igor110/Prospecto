@@ -10,7 +10,7 @@ namespace Prospecto.Models.ViewModel
         public int? BranchId { get; set; }
         public int? UserId { get; set; }
         public int TypeDate { get; set; }
-        public StatusAttendancesEnum Status { get; set; }
+        public StatusAttendancesEnum? Status { get; set; }
         public DateTime? BeginDate { get; set; }
         public DateTime? EndDate { get; set; }
     }

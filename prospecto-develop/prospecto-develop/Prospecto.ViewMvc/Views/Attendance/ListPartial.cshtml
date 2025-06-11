@@ -19,7 +19,7 @@
                 <th>Valor Venda</th>
                 <th>Status</th>
                 <th>Pedido Status</th>
-                <th>Observação</th>                
+                <th>Observação</th>
             </tr>
         </thead>
         <tbody>
@@ -49,7 +49,7 @@
                             }
                         </div>
                     </td>
-                    <td id="@(!User.IsInRole(UserTypeEnum.CONSULTANT.ToString()) ? item.Id : "" )" style="width: 5%">  @item.User?.Name</td>
+                    <td id="@(!User.IsInRole(UserTypeEnum.CONSULTANT.ToString()) ? item.Id : "")" style="width: 5%">  @item.User?.Name</td>
                     <td style="width: 5%">  @item.Company?.Description/@item.Branch?.Description</td>
                     <td> @item.NameClient </td>
                     <td> @item.Telephone </td>
@@ -61,10 +61,9 @@
                     <td> @string.Format("{0:0.00}", item.ValueClosed)  </td>
                     <td> @(StatusAttendance.FromStatusAttendances(item.Status))</td>
                     <td> @(StatusOrder.FromStatusOrder(item.StatusOrder))</td>
-                    <td> @item.Observation </td>                    
+                    <td> @item.Observation </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-
