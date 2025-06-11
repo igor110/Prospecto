@@ -32,6 +32,8 @@
     <_ContentIncludedByDefault Remove="wwwroot\js\moment.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\js\perfect-scrollbar.jquery.min.js" />
     <_ContentIncludedByDefault Remove="wwwroot\js\sidebarmenu.js" />
+	<PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

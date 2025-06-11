@@ -359,12 +359,18 @@ namespace Prospecto.ViewMvc.Controllers
 
             var statusEtapas = statusList.FirstOrDefault()?.Value?.Split(',')?.Select(s => s.Trim()).ToList() ?? new List<string>();
 
-            // Mapeia índice do Status (int) para o nome da etapa
             foreach (var item in atendimentos)
             {
                 var index = (int)item.Status;
                 item.StatusLabel = (index >= 0 && index < statusEtapas.Count) ? statusEtapas[index] : "Indefinido";
             }
+
+            // 🔧 Adicione isso:
+            ViewBag.listTypeDate = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Data de Cadastro", Value = "registered" },
+        new SelectListItem { Text = "Data de Retorno", Value = "return" }
+    };
 
             ViewBag.KanbanStatus = statusEtapas;
             ViewBag.BeginDate = filters.BeginDate;
@@ -373,6 +379,7 @@ namespace Prospecto.ViewMvc.Controllers
 
             return View(atendimentos);
         }
+
 
 
         public async Task<IActionResult> Save(AttendanceViewModel attendanceViewModel)

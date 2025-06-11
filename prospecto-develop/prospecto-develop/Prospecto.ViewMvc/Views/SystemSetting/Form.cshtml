@@ -6,51 +6,90 @@
     var availableKeys = new List<SelectListItem>
     {
         new SelectListItem { Text = "Funil de Vendas (Kanban)", Value = "kanban-status" }
-        // Aqui futuramente adicionamos outras chaves configuráveis
     };
 }
 
-<h2>@ViewBag.Title</h2>
+@using (Html.BeginForm("Form", "SystemSetting", FormMethod.Post))
+{
+    <section class="content-header">
+        <h1>
+            @ViewBag.Title
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="@Url.Action("Index", "SystemSetting")">Parâmetros</a></li>
+            <li class="active">@ViewBag.Title</li>
+        </ol>
+    </section>
 
-<form asp-action="Form" method="post">
-    <input type="hidden" asp-for="Id" />
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-body">
+                        <input type="hidden" asp-for="Id" />
 
-    <div class="form-group">
-        <label asp-for="Key">Tipo de Parâmetro</label>
-        <select asp-for="Key" class="form-control" asp-items="availableKeys">
-            <option value="">Selecione o tipo</option>
-        </select>
-        <span asp-validation-for="Key" class="text-danger"></span>
-    </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Key">Tipo de Parâmetro</label>
+                                    <select asp-for="Key" class="form-control" asp-items="availableKeys">
+                                        <option value="">Selecione o tipo</option>
+                                    </select>
+                                    <span asp-validation-for="Key" class="text-danger"></span>
+                                </div>
+                            </div>
 
-    <div class="form-group">
-        <label asp-for="CompanyId">Empresa</label>
-        <select asp-for="CompanyId" class="form-control" asp-items="companies">
-            <option value="">Selecione a empresa</option>
-        </select>
-        <span asp-validation-for="CompanyId" class="text-danger"></span>
-    </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="CompanyId">Empresa</label>
+                                    <select asp-for="CompanyId" class="form-control" asp-items="companies">
+                                        <option value="">Selecione a empresa</option>
+                                    </select>
+                                    <span asp-validation-for="CompanyId" class="text-danger"></span>
+                                </div>
+                            </div>
 
-    <div class="form-group">
-        <label asp-for="BranchId">Filial (opcional)</label>
-        <select asp-for="BranchId" class="form-control" asp-items="branches">
-            <option value="">Todas as filiais</option>
-        </select>
-        <span asp-validation-for="BranchId" class="text-danger"></span>
-    </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="BranchId">Filial (opcional)</label>
+                                    <select asp-for="BranchId" class="form-control" asp-items="branches">
+                                        <option value="">Todas as filiais</option>
+                                    </select>
+                                    <span asp-validation-for="BranchId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div class="form-group">
-        <label asp-for="Value">Valor</label>
-        <input asp-for="Value" class="form-control" />
-        <span asp-validation-for="Value" class="text-danger"></span>
-    </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Value">Valor</label>
+                                    <input asp-for="Value" class="form-control" />
+                                    <span asp-validation-for="Value" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <button type="submit" class="btn btn-success">Salvar</button>
-    <a href="@Url.Action("Index", new { key = Model.Key ?? "" })" class="btn btn-secondary">Voltar</a>
-</form>
+                    </div>
+
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-block">Salvar</button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="@Url.Action("Index", new { key = Model.Key ?? "" })" class="btn btn-default btn-block">Voltar</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+}
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

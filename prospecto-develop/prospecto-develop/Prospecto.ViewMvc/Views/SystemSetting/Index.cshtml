@@ -4,50 +4,90 @@
     var key = ViewBag.Key as string ?? "kanban-status";
 }
 
-<h2>Parâmetros do Sistema - @key</h2>
+<section class="content-header">
+    <h1>
+        Parâmetros do Sistema
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Parâmetros</li>
+    </ol>
+</section>
 
-<form method="get" class="form-inline mb-3">
-    <label for="key" class="mr-2">Filtro por chave:</label>
-    <input type="text" name="key" value="@key" class="form-control mr-2" placeholder="Ex: kanban-status" />
-    <button type="submit" class="btn btn-primary">Filtrar</button>
-</form>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-header">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="key">Filtro por chave</label>
+                            <input type="text" name="key" value="@key" class="form-control" placeholder="Ex: kanban-status" />
+                        </div>
+                    </div>
 
-<a href="@Url.Action("Form", new { key = key })" class="btn btn-primary mb-3">Novo</a>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" formmethod="get" formaction="@Url.Action("Index")" class="btn btn-default form-control">
+                                <span class="fa fa-filter"></span>&nbsp;Filtrar
+                            </button>
+                        </div>
+                    </div>
 
-@if (Model != null && Model.Any())
-{
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Empresa</th>
-                <th>Filial</th>
-                <th>Chave</th>
-                <th>Valor</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.CompanyName</td>
-                    <td>@(string.IsNullOrEmpty(item.BranchName) ? "Todas as Filiais" : item.BranchName)</td>
-                    <td>@item.Key</td>
-                    <td>@item.Value</td>
-                    <td>
-                        <a href="@Url.Action("Form", new { id = item.Id })" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="@Url.Action("Delete", new { id = item.Id })" class="btn btn-sm btn-danger" onclick="return confirm('Confirma exclusão?')">Excluir</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-info">Nenhum parâmetro cadastrado encontrado para a chave <strong>@key</strong>.</div>
-}
-@if (TempData["debug"] != null)
-{
-    <div class="alert alert-warning">@TempData["debug"]</div>
-}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <a href="@Url.Action("Form", new { key = key })" class="btn btn-primary form-control" id="BotaoCriar">
+                                <span class="fa fa-plus"></span>&nbsp;Adicionar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="box-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Filial</th>
+                                    <th>Chave</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.CompanyName</td>
+                                        <td>@(string.IsNullOrEmpty(item.BranchName) ? "Todas as Filiais" : item.BranchName)</td>
+                                        <td>@item.Key</td>
+                                        <td>@item.Value</td>
+                                        <td>
+                                            <a href="@Url.Action("Form", new { id = item.Id })" class="btn btn-sm btn-warning">Editar</a>
+                                            <a href="@Url.Action("Delete", new { id = item.Id })" class="btn btn-sm btn-danger" onclick="return confirm('Confirma exclusão?')">Excluir</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">Nenhum parâmetro cadastrado encontrado para a chave <strong>@key</strong>.</div>
+                    }
+
+                    @if (TempData["debug"] != null)
+                    {
+                        <div class="alert alert-warning">@TempData["debug"]</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

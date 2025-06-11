@@ -20,7 +20,6 @@ using System;
 using System.Globalization;
 using MySql.Data.MySqlClient;
 
-
 namespace Prospecto.ViewMvc
 {
     public class Startup
@@ -40,6 +39,7 @@ namespace Prospecto.ViewMvc
             services.ConfigureOptions(Configuration);
             services.AddControllers().AddNewtonsoftJson();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
             services.AddScoped<INotificationRepository, NotificationRepository>(); // se ainda não existir, criar depois
             services.AddScoped<System.Data.IDbConnection>(sp =>
             {
@@ -120,7 +120,7 @@ namespace Prospecto.ViewMvc
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
-
+            //app.UsePathBase("/prospecto");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

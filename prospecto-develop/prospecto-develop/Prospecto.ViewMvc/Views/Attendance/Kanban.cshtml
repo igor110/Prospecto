@@ -4,62 +4,93 @@
     var statusList = ViewBag.KanbanStatus as List<string> ?? new List<string> { "Aberto", "Fechado" };
 }
 
-<style>
-    .kanban-board {
-        display: flex;
-        gap: 1rem;
-        overflow-x: auto;
-    }
+@using (Html.BeginForm("Kanban", "Attendance", FormMethod.Post))
+{
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Kanban</li>
+        </ol>
+    </section>
 
-    .kanban-column {
-        background: #f4f4f4;
-        border-radius: 8px;
-        padding: 1rem;
-        min-width: 300px;
-        flex: 1;
-    }
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-header">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="TypeDate">Tipo de data</label>
+                                <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control">
+                                </select>
+                            </div>
+                        </div>
 
-        .kanban-column .card {
-            cursor: grab;
-        }
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="BeginDate">Data Início</label>
+                                <input type="date" name="BeginDate" class="form-control" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.BeginDate))" />
+                            </div>
+                        </div>
 
-        .kanban-column.over {
-            border: 2px dashed #007bff;
-        }
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="EndDate">Data Fim</label>
+                                <input type="date" name="EndDate" class="form-control" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.EndDate))" />
+                            </div>
+                        </div>
 
-    .kanban-card {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-</style>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-default form-control" style="margin-top: 25px;">
+                                <span class="fa fa-filter"></span>&nbsp;Filtrar
+                            </button>
+                        </div>
 
-<div class="kanban-board">
-    @foreach (var status in statusList)
-    {
-        <div class="kanban-column" data-status="@status" ondrop="drop(event)" ondragover="allowDrop(event)">
-            <div class="card text-white bg-primary mb-2">
-                <div class="card-body">
-                    <strong>@status</strong>
+                        <div class="col-md-2">
+                            <div class="btn-group pull-right" style="margin-top: 25px;">
+                                <a class="btn btn-primary" href="@Url.Action("Index", "Attendance")">
+                                    <span class="fa fa-plus"></span>&nbsp;Adicionar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="box-body">
+                        <div class="kanban-board">
+                            @foreach (var status in statusList)
+                            {
+                                <div class="kanban-column" data-status="@status" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <div class="card text-white bg-primary mb-2">
+                                        <div class="card-body">
+                                            <strong>@status</strong>
+                                        </div>
+                                    </div>
+
+                                    @foreach (var item in Model.Where(a => a.StatusLabel == status))
+                                    {
+                                        <div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
+                                            <p><strong>@item.NameClient</strong></p>
+                                            <p>@item.Telephone</p>
+                                            @if (item.DateReturn > DateTime.MinValue)
+                                            {
+                                                <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            @foreach (var item in Model.Where(a => a.StatusLabel == status))
-            {
-                <div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
-                    <p><strong>@item.NameClient</strong></p>
-                    <p>@item.Telephone</p>
-                    @if (item.DateReturn > DateTime.MinValue)
-                    {
-                        <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
-                    }
-                </div>
-            }
         </div>
-    }
-</div>
+    </section>
+}
 
 @section Scripts {
     <script>
@@ -74,12 +105,8 @@
         function drop(ev) {
             ev.preventDefault();
             const id = ev.dataTransfer.getData("text");
-
             const targetColumn = ev.currentTarget;
-            let status = targetColumn.getAttribute("data-status");
-
-            // 🔍 Remove aspas e espaços desnecessários
-            status = status.replace(/^['"]+|['"]+$/g, '').trim();
+            let status = targetColumn.getAttribute("data-status").replace(/^['"]+|['"]+$/g, '').trim();
 
             const draggedCard = document.querySelector('[data-id="' + id + '"]');
             if (draggedCard && targetColumn !== draggedCard.parentNode) {
@@ -88,23 +115,14 @@
 
             fetch('/Attendance/UpdateStatus', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: parseInt(id),
-                    status: status
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: parseInt(id), status: status })
             })
             .then(response => response.json())
             .then(data => {
-                if (!data.success) {
-                    alert('Erro ao atualizar: ' + data.message);
-                }
+                if (!data.success) alert('Erro ao atualizar: ' + data.message);
             })
-            .catch(error => {
-                console.error('Erro:', error);
-            });
+            .catch(error => console.error('Erro:', error));
         }
     </script>
 }
