@@ -43,10 +43,11 @@ namespace Prospecto.Service
                 .WhereIf(filters.CompanyId > 0, x => x.CompanyId == filters.CompanyId)
                 .WhereIf(filters.BranchId > 0, x => x.BranchId == filters.BranchId)
                 .WhereIf(filters.UserId > 0, x => x.UserId == filters.UserId)
-                .WhereIf(filters.Status > 0, x => x.Status == filters.Status)
+                //.WhereIf(filters.Status != null, x => x.Status == filters.Status)
                 .WhereIf(filters.BeginDate.HasValue && filters.TypeDate == 1, x => x.DateRegistred >= filters.BeginDate.Value && x.DateRegistred <= filters.EndDate.Value)
                 .WhereIf(filters.BeginDate.HasValue && filters.TypeDate == 2, x => x.DateReturn >= filters.BeginDate.Value && x.DateReturn <= filters.EndDate.Value)
                 .WhereIf(filters.BeginDate.HasValue && filters.TypeDate == 3, x => x.DateClosed >= filters.BeginDate.Value && x.DateClosed <= filters.EndDate.Value)
+                .WhereIf(filters.StatusId.HasValue, x => x.Status == (StatusAttendancesEnum)filters.StatusId.Value)
                 .Select(x => x.AsAttendanceViewMode()).ToList();
         }
 

@@ -72,14 +72,36 @@
 
                                     @foreach (var item in Model.Where(a => a.StatusKanban == i))
                                     {
-                                        <div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
-                                            <p><strong>@item.NameClient</strong></p>
-                                            <p>@item.Telephone</p>
-                                            @if (item.DateReturn > DateTime.MinValue)
-                                            {
-                                                <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
+<div class="kanban-card" data-id="@item.Id" draggable="true" ondragstart="drag(event)">
+    <p><strong>@item.NameClient</strong></p>
+    <p>@item.Telephone</p>
+
+    @if (item.DateReturn > DateTime.MinValue)
+    {
+        <p>Retorno: @item.DateReturn.ToString("dd/MM/yyyy HH:mm")</p>
+    }
+
+                                        <div class="kanban-actions text-right">
+                                            @{
+                                                if (item.DateClosed == null && item.Status == Prospecto.Models.Enums.StatusAttendancesEnum.OPEN)
+                                                {
+                                                    <a class="fa fa-money" title="Encerrar" href="@Url.Action("Close", "Attendance", new { Id = item.Id })" style="font-size: 14px; color: #75798B; margin-left: 5px;"></a>
+                                                    <a class="fa fa-calendar" title="Reagendar" href="@Url.Action("Reschedule", "Attendance", new { Id = item.Id })" style="font-size: 14px; color: #75798B; margin-left: 5px;"></a>
+                                                }
+
+                                                if (!User.IsInRole(Prospecto.Models.Enums.UserTypeEnum.CONSULTANT.ToString()))
+                                                {
+                                                    <a class="fa fa-pencil" title="Editar" href="@Url.Action("Index", "Attendance")/@item.Id" style="font-size: 14px; color: #75798B; margin-left: 5px;"></a>
+
+                                                    if (item.Status == Prospecto.Models.Enums.StatusAttendancesEnum.CLOSED)
+                                                    {
+                                                        <a class="fa fa-remove" title="Excluir" href="@Url.Action("Delete", "Attendance")/@item.Id" style="font-size: 14px; color: #dd4b39; margin-left: 5px;"></a>
+                                                    }
+                                                }
                                             }
                                         </div>
+                                    </div>
+
                                     }
                                 </div>
                             }

@@ -1,6 +1,4 @@
-﻿@using Prospecto.Models.Enums
-
-@using (Html.BeginForm("ListPartial", "Attendance", FormMethod.Post, new { role = "Attendance" }))
+﻿@using (Html.BeginForm("ListPartial", "Attendance", FormMethod.Post, new { role = "Attendance" }))
 {
     <section class="content-header">
         <h1>
@@ -12,16 +10,14 @@
             <li class="active">Atendimento</li>
         </ol>
     </section>
-
     <section class="content">
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-info">
                     <div class="box-header">
-
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="TypeDate">Tipo de data</label>
+                                <label for="ReschedulingOrigin">Tipo de data</label>
                                 <select name="TypeDate" asp-items="ViewBag.listTypeDate" class="form-control"></select>
                             </div>
                         </div>
@@ -29,71 +25,14 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label for="BeginDate">Data Início</label>
-                                <input type="date" class="form-control" id="BeginDate" name="BeginDate"
-                                       value="@(ViewBag.BeginDate != null ? ((DateTime)ViewBag.BeginDate).ToString("yyyy-MM-dd") : "")" />
+                                <input type="date" class="form-control" id="BeginDate" name="BeginDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.BeginDate))">
                             </div>
                         </div>
 
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label for="EndDate">Data Fim</label>
-                                <input type="date" class="form-control" id="EndDate" name="EndDate"
-                                       value="@(ViewBag.EndDate != null ? ((DateTime)ViewBag.EndDate).ToString("yyyy-MM-dd") : "")" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="Status">Status</label>
-                                @{
-                                    var status = ViewBag.StatusId?.ToString();
-                                }
-
-                                <select name="StatusId" class="form-control">
-                                    @if (string.IsNullOrEmpty(status))
-                                    {
-                                        @:
-                                        <option value="" selected>-- Todos --</option>
-                                    }
-                                    else
-                                    {
-                                        @:
-                                        <option value="">-- Todos --</option>
-                                    }
-
-                                    @if (status == "1")
-                                    {
-                                        @:
-                                        <option value="1" selected>Aberto</option>
-                                    }
-                                    else
-                                    {
-                                        @:
-                                        <option value="1">Aberto</option>
-                                    }
-
-                                    @if (status == "3")
-                                    {
-                                        @:
-                                        <option value="3" selected>Reagendado</option>
-                                    }
-                                    else
-                                    {
-                                        @:
-                                        <option value="3">Reagendado</option>
-                                    }
-
-                                    @if (status == "2")
-                                    {
-                                        @:
-                                        <option value="2" selected>Fechado</option>
-                                    }
-                                    else
-                                    {
-                                        @:
-                                        <option value="2">Fechado</option>
-                                    }
-                                </select>
+                                <input type="date" class="form-control" id="EndDate" name="EndDate" value="@(string.Format("{0:yyyy-MM-dd}", ViewBag.EndDate))">
                             </div>
                         </div>
 

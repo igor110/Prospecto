@@ -1,0 +1,69 @@
+﻿@using Prospecto.Models.Enums;
+@model IEnumerable<Prospecto.Models.ViewModel.AttendanceViewModel>
+
+
+<div class="adv-table">
+    <table id="tableAttendance" class="table table-bordered table-hover display nowrap" style="width:100%">
+        <thead>
+            <tr>
+                <th>Opções</th>
+                <th>Consultor</th>
+                <th>Loja</th>
+                <th>Cliente</th>
+                <th>Telefone</th>
+                <th>Produto</th>
+                <th>Dt. Registro</th>
+                <th>Dt. Retorno</th>
+                <th>Dt. Fechamento</th>
+                <th>Valor</th>
+                <th>Valor Venda</th>
+                <th>Status</th>
+                <th>Pedido Status</th>
+                <th>Observação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr style="cursor: pointer">
+                    <td style="width: 8%">
+                        <div class="text-center">
+
+                            @{
+                                if (item.DateClosed == null && item.Status == StatusAttendancesEnum.OPEN)
+                                {
+                                    <a class="fa fa-money" title="Encerrar" data-id="@item.Id" style="font-size: 16px; color: #75798B" href="@Url.Action("Close", "Attendance", new { Id = item.Id })">&nbsp;</a>
+                                    <a class="fa fa-calendar" title="Reagendar" data-id="@item.Id" style="font-size: 16px; color: #75798B" href="@Url.Action("Reschedule", "Attendance", new { Id = item.Id })">&nbsp;</a>
+                                }
+
+                                if (!User.IsInRole(UserTypeEnum.CONSULTANT.ToString()))
+                                {
+                                    <a class="fa fa-pencil" title="Editar" data-id="@item.Id" style="font-size: 16px; color: #75798B" href="@Url.Action("Index", "Attendance")/@item.Id">&nbsp;</a>
+                                    if (item.Status == Prospecto.Models.Enums.StatusAttendancesEnum.CLOSED)
+                                    {
+                                        <a class="fa fa-remove" title="Excluir" data-id="@item.Id" style="font-size: 16px; color: #dd4b39" href="@Url.Action("Delete", "Attendance")/@item.Id">&nbsp;</a>
+                                    }
+
+                                }
+
+                            }
+                        </div>
+                    </td>
+                    <td id="@(!User.IsInRole(UserTypeEnum.CONSULTANT.ToString()) ? item.Id : "")" style="width: 5%">  @item.User?.Name</td>
+                    <td style="width: 5%">  @item.Company?.Description/@item.Branch?.Description</td>
+                    <td> @item.NameClient </td>
+                    <td> @item.Telephone </td>
+                    <td> @item.NameProduct </td>
+                    <td> @(string.Format("{0:dd/MM/yyyy}", item.DateRegistred))</td>
+                    <td> @(string.Format("{0:dd/MM/yyyy}", item.DateReturn))</td>
+                    <td> @(string.Format("{0:dd/MM/yyyy}", item.DateClosed))</td>
+                    <td> @string.Format("{0:0.00}", item.Value)  </td>
+                    <td> @string.Format("{0:0.00}", item.ValueClosed)  </td>
+                    <td> @(StatusAttendance.FromStatusAttendances(item.Status))</td>
+                    <td> @(StatusOrder.FromStatusOrder(item.StatusOrder))</td>
+                    <td> @item.Observation </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

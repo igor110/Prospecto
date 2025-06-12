@@ -5,13 +5,14 @@ using Microsoft.Extensions.Logging;
 using Prospecto.Models.DTO;
 using Prospecto.Models.Enums;
 using Prospecto.Models.ViewModel;
+using Prospecto.Respository.Interface;
 using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace Prospecto.ViewMvc.Controllers
@@ -22,7 +23,7 @@ namespace Prospecto.ViewMvc.Controllers
         private readonly IClientService _clientService;
         private readonly IMapper _mapper;
         private readonly ICompanyService _companyService;
-
+        private readonly IClientRepository _clientRepository;
         private readonly string Title = "Clientes";
         private readonly string Message = "Preencha os dados do cliente para realizar o cadastro!";
 
@@ -30,46 +31,61 @@ namespace Prospecto.ViewMvc.Controllers
             IMapper mapper,
             IClientService ClientService,
             ICompanyService companyService,
-            ILogger<ClientController> logger)
+            ILogger<ClientController> logger,
+            IClientRepository clientRepository)
         {
             _logger = logger;
             _clientService = ClientService;
             _mapper = mapper;
             _companyService = companyService;
+            _clientRepository = clientRepository;
         }
+
+
         public IActionResult Index(int? Id)
         {
-
-            GetContextData();
-
-            ViewData["Title"] = Title;
-            ViewData["Message"] = Message;
-
-            var obj = new ClientViewModel
+            try
             {
-                TypePerson = ClientTypePersonEnum.PHYSICAL
-            };
+                GetContextData();
 
-            if (Id > 0)
-            {
-                obj = _clientService.Get(Id.Value).Result.Value.AsClientViewMode();
-                if (Role != UserTypeEnum.ADMINISTRATOR.ToString())
-                {
-                    TempData["error"] = "Não é possivel visualizar os dados desse cliente! Pertece a outro usuário.";
-                    if (obj.CompanyId != CompanyId) return RedirectToAction("List");
-                }
-            }
+                ViewData["Title"] = Title;
+                ViewData["Message"] = Message;
 
-            IList<SelectListItem> listTypePerson = new List<SelectListItem>
+                var obj = new ClientViewModel
                 {
-                    new SelectListItem { Value = Convert.ToInt32(ClientTypePersonEnum.PHYSICAL).ToString(), Text = ClientTypePerson.FromClientTypePerson(ClientTypePersonEnum.PHYSICAL), Selected = obj.Id <= 0 || obj.TypePerson == ClientTypePersonEnum.PHYSICAL },
-                    new SelectListItem { Value = Convert.ToInt32(ClientTypePersonEnum.LEGAL).ToString(), Text = ClientTypePerson.FromClientTypePerson(ClientTypePersonEnum.LEGAL), Selected = obj.Id > 0 && obj.TypePerson == ClientTypePersonEnum.LEGAL }
+                    TypePerson = ClientTypePersonEnum.PHYSICAL
                 };
 
-            ViewBag.ListTypePerson = listTypePerson;
+                if (Id > 0)
+                {
+                    var result = _clientService.Get(Id.Value).Result;
 
-            return View(obj);
+                    if (!result.Success)
+                    {
+                        TempData["error"] = "Cliente não encontrado.";
+                        return RedirectToAction("List");
+                    }
+
+                    obj = result.Value.AsClientViewMode();
+
+                    if (Role == UserTypeEnum.CONSULTANT.ToString() && obj.UserId != UserId)
+                    {
+                        TempData["error"] = "Você não tem permissão para editar esse cliente.";
+                        return RedirectToAction("List");
+                    }
+                }
+
+                return View(obj);
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Erro ao carregar cliente: {ex.Message}";
+                return RedirectToAction("List");
+            }
         }
+
+
+
 
         public IActionResult List()
         {
@@ -94,8 +110,22 @@ namespace Prospecto.ViewMvc.Controllers
             {
                 GetContextData();
                 var dto = _mapper.Map<ClientDTO>(clientViewModel);
+
                 if (clientViewModel.Id > 0)
+                {
+                    // Recupera o cliente atual no banco
+                    var existingClient = await _clientService.Get(clientViewModel.Id);
+                    if (!existingClient.Success)
+                    {
+                        TempData["error"] = "Cliente não encontrado.";
+                        return RedirectToAction("List");
+                    }
+
+                    // Preserva o UserId já salvo (evita null ou zero)
+                    dto.UserId = existingClient.Value.UserId;
+
                     await _clientService.Update(clientViewModel.Id, dto);
+                }
                 else
                 {
                     if (CompanyId > 0)
@@ -104,7 +134,8 @@ namespace Prospecto.ViewMvc.Controllers
                     if (BranchId > 0)
                         dto.BranchId = BranchId;
 
-                    if (UserId > 0) dto.UserId = UserId;
+                    if (UserId > 0)
+                        dto.UserId = UserId;
 
                     await _clientService.Insert(dto);
                     TempData["success"] = "Cliente salvo com sucesso!";
@@ -116,8 +147,8 @@ namespace Prospecto.ViewMvc.Controllers
             {
                 return RedirectToAction("Error", "Shared");
             }
-
         }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -125,27 +156,46 @@ namespace Prospecto.ViewMvc.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        //Busca por clientes via nome
         [HttpGet]
         public JsonResult SearchClients(string term)
         {
-            var clients = _clientService.SearchByName(term); // deve retornar List<ClientInfo>
-            return Json(clients.Select(c => new
+            try
             {
-                id = c.Id,
-                name = c.Name,
-                telephone = c.Telephone,
-                email = c.Email,
-                cpf = c.CPF,
-                cnpj = c.CNPJ,
-                typePerson = c.TypePerson,
-                address = c.Address,
-                number = c.Number,
-                complement = c.Complement,
-                zipCode = c.ZipCode,
-                neighborhood = c.Neighborhood,
-                city = c.City
-            }));
+                // Aqui usamos a claim correta definida no login (SID = user.Id)
+                var claim = User.FindFirst(System.Security.Claims.ClaimTypes.Sid);
+                if (claim == null || !int.TryParse(claim.Value, out int userId))
+                {
+                    return Json(new { success = false, message = "Usuário não autenticado corretamente." });
+                }
+
+                var clients = _clientRepository
+                    .ListWithRelations(c => c.UserId == userId && c.Name.Contains(term))
+                    .Select(c => new {
+                        id = c.Id,
+                        name = c.Name,
+                        telephone = c.Telephone,
+                        email = c.Email,
+                        cpf = c.CPF,
+                        cnpj = c.CNPJ,
+                        typePerson = (int)c.TypePerson,
+                        address = c.Address,
+                        number = c.Number,
+                        complement = c.Complement,
+                        zipCode = c.ZipCode,
+                        neighborhood = c.Neighborhood,
+                        city = c.City
+                    })
+                    .ToList();
+
+                return Json(clients);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Erro ao buscar clientes: " + ex.Message });
+            }
         }
+
+
+
     }
 }
