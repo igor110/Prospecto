@@ -2,18 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 using Prospecto.IService;
 using Prospecto.Models.DTO;
 using Prospecto.Models.Enums;
 using Prospecto.Models.Request;
 using Prospecto.Models.ViewModel;
 using Prospecto.Service.Interface;
-using Prospecto.ViewMvc.Extensions;
-using Prospecto.ViewMvc.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -338,7 +334,7 @@ namespace Prospecto.ViewMvc.Controllers
             filters.TypeDate = filters.TypeDate == 0 ? 2 : filters.TypeDate;
             if (Role != UserTypeEnum.ADMINISTRATOR.ToString())
                 filters.CompanyId = CompanyId;
-                filters.BranchId = BranchId;
+            filters.BranchId = BranchId;
 
             if (Role == UserTypeEnum.CONSULTANT.ToString())
                 filters.UserId = UserId;
@@ -499,9 +495,67 @@ namespace Prospecto.ViewMvc.Controllers
                     success = false,
                     message = $"Erro completo: {ex.Message}\n\nStackTrace: {ex.StackTrace}\n\nInner: {(ex.InnerException?.Message ?? "sem inner exception")}"
 
-            });
+                });
             }
         }
+
+        [HttpPost]
+        [Route("api/attendance")]
+        public async Task<JsonResult> CreateFromMobile([FromBody] AttendanceMobileViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Dados inválidos." });
+
+            try
+            {
+                var entity = new AttendanceViewModel
+                {
+                    NameClient = model.NameClient,
+                    Telephone = model.Telephone,
+                    NameProduct = model.Product,
+                    Value = model.Value,
+                    Observation = model.Observation,
+                    DateRegistred = DateTime.Now,
+                    DateReturn = DateTime.Parse($"{model.DateReturn} {model.TimeReturn}"),
+                    TimeReturn = TimeSpan.Parse(model.TimeReturn),
+                    NotifyAt = model.Notify ? DateTime.Parse($"{model.DateReturn} {model.TimeReturn}") : (DateTime?)null,
+                    Status = StatusAttendancesEnum.OPEN,
+                    StatusOrder = StatusOrderEnum.GAIN,
+                    ReschedulingOrigin = ParseReschedulingOrigin(model.Source),
+                    UserId = 10,       // Ajustar futuramente com base no usuário logado
+                    CompanyId = 2,    // Ajustar dinamicamente se necessário
+                    BranchId = 1      // Ajustar conforme necessário
+                };
+
+                var result = await _attendanceService.InsertFromMobile(entity);
+
+                if (!result.Success)
+                    return Json(new { success = false, message = result.ErrorId ?? "Erro ao salvar atendimento." });
+
+                return Json(new { success = true, message = "Atendimento salvo com sucesso." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erro interno: {ex.Message}" });
+            }
+        }
+
+
+        private ReschedulingOriginEnum ParseReschedulingOrigin(string source)
+        {
+            return source?.Trim().ToLower() switch
+            {
+                var s when s == ReschedulingOrigin.EMAIL.ToLower() => ReschedulingOriginEnum.EMAIL,
+                var s when s == ReschedulingOrigin.TELEPHONE.ToLower() => ReschedulingOriginEnum.TELEPHONE,
+                var s when s == ReschedulingOrigin.STORE.ToLower() => ReschedulingOriginEnum.STORE,
+                var s when s == ReschedulingOrigin.INTERNET.ToLower() => ReschedulingOriginEnum.INTERNET,
+                var s when s == ReschedulingOrigin.PROSPECTION.ToLower() => ReschedulingOriginEnum.PROSPECTION,
+                var s when s == ReschedulingOrigin.IMPORT.ToLower() => ReschedulingOriginEnum.IMPORT,
+                _ => ReschedulingOriginEnum.TELEPHONE // padrão de fallback
+            };
+        }
+
+
 
     }
 }

@@ -122,11 +122,14 @@ namespace Prospecto.ViewMvc
             app.UseAuthentication();
             //app.UsePathBase("/prospecto");
             app.UseEndpoints(endpoints =>
+            app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers(); // <-- para rotas com [Route("api/...")
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Account}/{action=Login}/{id?}");
-            });
+            }));
+
         }
     }
 }

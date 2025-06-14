@@ -22,14 +22,14 @@ using System.Threading.Tasks;
 namespace Prospecto.Service
 {
     public class AttendanceService : AbstractServiceBase<AttendanceDTO, AttendanceInfo, IAttendanceRepository>, IAttendanceService
-    {        
+    {
         private readonly IUserService _userService;
 
         public AttendanceService(
             IUserService userService,
             IAttendanceRepository repository,
             IMapper mapper) : base(repository, mapper)
-        {            
+        {
             _userService = userService;
         }
 
@@ -347,7 +347,7 @@ namespace Prospecto.Service
 
             try
             {
-                var obj = _repository.GetQuery(id).FirstOrDefault();                
+                var obj = _repository.GetQuery(id).FirstOrDefault();
                 _repository.Delete(obj);
                 return Result.Success<object>(null);
             }
@@ -367,7 +367,7 @@ namespace Prospecto.Service
                         .ToList()
                         .GroupBy(x => x.UserId);
 
-            
+
             List<ScheduleServiceViewModel> lstSecheduleService = new();
             if (query.Any())
             {
@@ -395,5 +395,25 @@ namespace Prospecto.Service
             var atendimentoDTO = _mapper.Map<AttendanceDTO>(atendimentoViewModel);
             Update(id, atendimentoDTO);
         }
+
+        public async Task<ResultContent> InsertFromMobile(AttendanceViewModel model)
+        {
+            try
+            {
+                var dto = _mapper.Map<AttendanceDTO>(model);
+
+                if (dto.BranchId == 0) dto.BranchId = null;
+                if (dto.CompanyId == 0) return Result.Error("Empresa não informada.");
+                if (dto.UserId == 0) return Result.Error("Usuário não informado.");
+
+                await Insert(dto);
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Error(ex.Message);
+            }
+        }
+
     }
 }

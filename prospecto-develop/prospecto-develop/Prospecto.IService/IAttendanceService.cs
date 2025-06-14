@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Prospecto.Models.DTO;
 using Prospecto.Models.Infos;
+using Prospecto.Models.Result;
 using Prospecto.Models.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace Prospecto.Service.Interface
         IList<RankingByConsultantViewModel> RankingByConsultant(RankingByConsultantFiltersViewModel filters);
         IList<ScheduleServiceViewModel> ScheduledService(AttendanceFiltersViewModel filters);
         IList<NotificationViewModel> GetPendingNotifications(int userId);
+        Task<ResultContent> InsertFromMobile(AttendanceViewModel model);
 
     }
 }
