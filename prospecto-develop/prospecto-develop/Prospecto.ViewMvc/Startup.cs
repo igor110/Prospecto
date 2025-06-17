@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+ï»¿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Prospecto.Data;
 using Prospecto.Filters;
 using Prospecto.IRespository;
@@ -18,7 +19,6 @@ using Prospecto.Service.Interface;
 using Prospecto.ViewMvc.Extensions;
 using System;
 using System.Globalization;
-using MySql.Data.MySqlClient;
 
 namespace Prospecto.ViewMvc
 {
@@ -37,25 +37,31 @@ namespace Prospecto.ViewMvc
         public void ConfigureServices(IServiceCollection services)
         {
             services.ConfigureOptions(Configuration);
-            services.AddControllers().AddNewtonsoftJson();
+
+            services.AddControllersWithViews()
+                    .AddNewtonsoftJson();
+
             services.AddScoped<INotificationService, NotificationService>();
-            services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
-            services.AddScoped<INotificationRepository, NotificationRepository>(); // se ainda não existir, criar depois
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<ISystemSettingService, SystemSettingService>();
+            services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+
             services.AddScoped<System.Data.IDbConnection>(sp =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 var connectionString = configuration.GetConnectionString(ProjectVariableConstants.ProspectoConnectionString);
                 return new MySql.Data.MySqlClient.MySqlConnection(connectionString);
             });
-            services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
-            services.AddScoped<ISystemSettingService, SystemSettingService>();
+
             services.AddDbContextPool<ProspectoContext>(options =>
             {
-                options.UseMySql(Configuration.GetConnectionString(ProjectVariableConstants.ProspectoConnectionString), new MySqlServerVersion(new Version(8, 0, 17)));
+                options.UseMySql(
+                    Configuration.GetConnectionString(ProjectVariableConstants.ProspectoConnectionString),
+                    new MySqlServerVersion(new Version(8, 0, 17))
+                );
             });
 
             services.AddDependencyInjection(_currentEnvironment, Configuration);
-            services.AddControllersWithViews();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -66,49 +72,43 @@ namespace Prospecto.ViewMvc
                 options.Password.RequiredLength = 4;
             });
 
-
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins",
-                    builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
             });
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options => { options.LoginPath = "/Login"; });
-
-
-
-            services.AddMvc().AddRazorPagesOptions(options =>
-            {
-                options.Conventions.AuthorizeFolder("/");
-                options.Conventions.AllowAnonymousToPage("/Login");
-            });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => { options.LoginPath = "/Login"; });
 
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;
                 options.Filters.Add<ClaimsRequirementFilter>();
             });
-
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // Definindo a cultura padrão: pt-BR
             var supportedCultures = new[] { new CultureInfo("pt-BR") };
             app.UseRequestLocalization(new RequestLocalizationOptions
             {
-                DefaultRequestCulture = new RequestCulture(culture: "pt-BR", uiCulture: "pt-BR"),
+                DefaultRequestCulture = new RequestCulture("pt-BR", "pt-BR"),
                 SupportedCultures = supportedCultures,
                 SupportedUICultures = supportedCultures
             });
 
-            app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
             using (var scope = app.ApplicationServices.CreateScope())
             {
@@ -116,20 +116,23 @@ namespace Prospecto.ViewMvc
                 dbContext.Database.Migrate();
             }
 
-            app.UseHttpsRedirection();
+            // Desativar HTTPS se estiver em desenvolvimento para evitar conflitos com o app mobile
+            // Comentado para aceitar acesso por HTTP no app mobile
+            // app.UseHttpsRedirection();
+
             app.UseStaticFiles();
+            app.UseCors("AllowAllOrigins");
             app.UseRouting();
             app.UseAuthentication();
-            //app.UsePathBase("/prospecto");
-            app.UseEndpoints(endpoints =>
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); // <-- para rotas com [Route("api/...")
+                endpoints.MapControllers(); // Para rotas como [Route("api/attendance")]
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Account}/{action=Login}/{id?}");
-            }));
-
+            });
         }
     }
 }

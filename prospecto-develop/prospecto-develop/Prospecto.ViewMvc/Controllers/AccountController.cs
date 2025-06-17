@@ -75,5 +75,29 @@ namespace Prospecto.ViewMvc.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        [HttpPost]
+        [Route("api/login")]
+        public IActionResult LoginFromMobile([FromBody] LoginMobileViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Dados inválidos." });
+
+            var user = _userService.GetUser(model.Email, model.Password);
+
+            if (user == null)
+                return Unauthorized(new { success = false, message = "Usuário ou senha inválidos." });
+
+            return Ok(new
+            {
+                success = true,
+                message = "Login realizado com sucesso.",
+                userId = user.Id,
+                name = user.Name,
+                email = user.Email
+            });
+        }
+
     }
 }

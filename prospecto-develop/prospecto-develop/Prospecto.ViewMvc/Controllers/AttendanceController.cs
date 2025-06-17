@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
@@ -499,6 +500,7 @@ namespace Prospecto.ViewMvc.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("api/attendance")]
         public async Task<JsonResult> CreateFromMobile([FromBody] AttendanceMobileViewModel model)
