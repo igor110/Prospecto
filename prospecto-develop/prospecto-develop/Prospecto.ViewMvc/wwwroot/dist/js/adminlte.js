@@ -1,1139 +1,713 @@
-/*! AdminLTE app.js
-* ================
-* Main JS application file for AdminLTE v2. This file
-* should be included in all pages. It controls some layout
-* options and implements exclusive AdminLTE plugins.
-*
-* @Author  Almsaeed Studio
-* @Support <https://www.almsaeedstudio.com>
-* @Email   <abdullah@almsaeedstudio.com>
-* @version 2.4.8
-* @repository git://github.com/almasaeed2010/AdminLTE.git
-* @license MIT <http://opensource.org/licenses/MIT>
-*/
-
-// Make sure jQuery has been loaded
-if (typeof jQuery === 'undefined') {
-throw new Error('AdminLTE requires jQuery')
-}
-
-/* BoxRefresh()
- * =========
- * Adds AJAX content control to a box.
- *
- * @Usage: $('#my-box').boxRefresh(options)
- *         or add [data-widget="box-refresh"] to the box element
- *         Pass any option as data-option="value"
+/*!
+ * AdminLTE v4.0.0-beta3 (https://adminlte.io)
+ * Copyright 2014-2025 Colorlib <https://colorlib.com>
+ * Licensed under MIT (https://github.com/ColorlibHQ/AdminLTE/blob/master/LICENSE)
  */
-+function ($) {
-  'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.adminlte = {}));
+})(this, (function (exports) { 'use strict';
 
-  var DataKey = 'lte.boxrefresh';
-
-  var Default = {
-    source         : '',
-    params         : {},
-    trigger        : '.refresh-btn',
-    content        : '.box-body',
-    loadInContent  : true,
-    responseType   : '',
-    overlayTemplate: '<div class="overlay"><div class="fa fa-refresh fa-spin"></div></div>',
-    onLoadStart    : function () {
-    },
-    onLoadDone     : function (response) {
-      return response;
-    }
-  };
-
-  var Selector = {
-    data: '[data-widget="box-refresh"]'
-  };
-
-  // BoxRefresh Class Definition
-  // =========================
-  var BoxRefresh = function (element, options) {
-    this.element  = element;
-    this.options  = options;
-    this.$overlay = $(options.overlayTemplate);
-
-    if (options.source === '') {
-      throw new Error('Source url was not defined. Please specify a url in your BoxRefresh source option.');
-    }
-
-    this._setUpListeners();
-    this.load();
-  };
-
-  BoxRefresh.prototype.load = function () {
-    this._addOverlay();
-    this.options.onLoadStart.call($(this));
-
-    $.get(this.options.source, this.options.params, function (response) {
-      if (this.options.loadInContent) {
-        $(this.element).find(this.options.content).html(response);
-      }
-      this.options.onLoadDone.call($(this), response);
-      this._removeOverlay();
-    }.bind(this), this.options.responseType !== '' && this.options.responseType);
-  };
-
-  // Private
-
-  BoxRefresh.prototype._setUpListeners = function () {
-    $(this.element).on('click', this.options.trigger, function (event) {
-      if (event) event.preventDefault();
-      this.load();
-    }.bind(this));
-  };
-
-  BoxRefresh.prototype._addOverlay = function () {
-    $(this.element).append(this.$overlay);
-  };
-
-  BoxRefresh.prototype._removeOverlay = function () {
-    $(this.$overlay).remove();
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, (data = new BoxRefresh($this, options)));
-      }
-
-      if (typeof data == 'string') {
-        if (typeof data[option] == 'undefined') {
-          throw new Error('No method named ' + option);
+    const domContentLoadedCallbacks = [];
+    const onDOMContentLoaded = (callback) => {
+        if (document.readyState === 'loading') {
+            // add listener on the first call when the document is in loading state
+            if (!domContentLoadedCallbacks.length) {
+                document.addEventListener('DOMContentLoaded', () => {
+                    for (const callback of domContentLoadedCallbacks) {
+                        callback();
+                    }
+                });
+            }
+            domContentLoadedCallbacks.push(callback);
         }
-        data[option]();
-      }
-    });
-  }
-
-  var old = $.fn.boxRefresh;
-
-  $.fn.boxRefresh             = Plugin;
-  $.fn.boxRefresh.Constructor = BoxRefresh;
-
-  // No Conflict Mode
-  // ================
-  $.fn.boxRefresh.noConflict = function () {
-    $.fn.boxRefresh = old;
-    return this;
-  };
-
-  // BoxRefresh Data API
-  // =================
-  $(window).on('load', function () {
-    $(Selector.data).each(function () {
-      Plugin.call($(this));
-    });
-  });
-
-}(jQuery);
-
-
-/* BoxWidget()
- * ======
- * Adds box widget functions to boxes.
- *
- * @Usage: $('.my-box').boxWidget(options)
- *         This plugin auto activates on any element using the `.box` class
- *         Pass any option as data-option="value"
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.boxwidget';
-
-  var Default = {
-    animationSpeed : 500,
-    collapseTrigger: '[data-widget="collapse"]',
-    removeTrigger  : '[data-widget="remove"]',
-    collapseIcon   : 'fa-minus',
-    expandIcon     : 'fa-plus',
-    removeIcon     : 'fa-times'
-  };
-
-  var Selector = {
-    data     : '.box',
-    collapsed: '.collapsed-box',
-    header   : '.box-header',
-    body     : '.box-body',
-    footer   : '.box-footer',
-    tools    : '.box-tools'
-  };
-
-  var ClassName = {
-    collapsed: 'collapsed-box'
-  };
-
-  var Event = {
-        collapsing: 'collapsing.boxwidget',
-        collapsed: 'collapsed.boxwidget',
-        expanding: 'expanding.boxwidget',
-        expanded: 'expanded.boxwidget',
-        removing: 'removing.boxwidget',
-        removed: 'removed.boxwidget'        
+        else {
+            callback();
+        }
+    };
+    /* SLIDE UP */
+    const slideUp = (target, duration = 500) => {
+        target.style.transitionProperty = 'height, margin, padding';
+        target.style.transitionDuration = `${duration}ms`;
+        target.style.boxSizing = 'border-box';
+        target.style.height = `${target.offsetHeight}px`;
+        target.style.overflow = 'hidden';
+        globalThis.setTimeout(() => {
+            target.style.height = '0';
+            target.style.paddingTop = '0';
+            target.style.paddingBottom = '0';
+            target.style.marginTop = '0';
+            target.style.marginBottom = '0';
+        }, 1);
+        globalThis.setTimeout(() => {
+            target.style.display = 'none';
+            target.style.removeProperty('height');
+            target.style.removeProperty('padding-top');
+            target.style.removeProperty('padding-bottom');
+            target.style.removeProperty('margin-top');
+            target.style.removeProperty('margin-bottom');
+            target.style.removeProperty('overflow');
+            target.style.removeProperty('transition-duration');
+            target.style.removeProperty('transition-property');
+        }, duration);
+    };
+    /* SLIDE DOWN */
+    const slideDown = (target, duration = 500) => {
+        target.style.removeProperty('display');
+        let { display } = globalThis.getComputedStyle(target);
+        if (display === 'none') {
+            display = 'block';
+        }
+        target.style.display = display;
+        const height = target.offsetHeight;
+        target.style.overflow = 'hidden';
+        target.style.height = '0';
+        target.style.paddingTop = '0';
+        target.style.paddingBottom = '0';
+        target.style.marginTop = '0';
+        target.style.marginBottom = '0';
+        globalThis.setTimeout(() => {
+            target.style.boxSizing = 'border-box';
+            target.style.transitionProperty = 'height, margin, padding';
+            target.style.transitionDuration = `${duration}ms`;
+            target.style.height = `${height}px`;
+            target.style.removeProperty('padding-top');
+            target.style.removeProperty('padding-bottom');
+            target.style.removeProperty('margin-top');
+            target.style.removeProperty('margin-bottom');
+        }, 1);
+        globalThis.setTimeout(() => {
+            target.style.removeProperty('height');
+            target.style.removeProperty('overflow');
+            target.style.removeProperty('transition-duration');
+            target.style.removeProperty('transition-property');
+        }, duration);
     };
 
-  // BoxWidget Class Definition
-  // =====================
-  var BoxWidget = function (element, options) {
-    this.element = element;
-    this.options = options;
-
-    this._setUpListeners();
-  };
-
-  BoxWidget.prototype.toggle = function () {
-    var isOpen = !$(this.element).is(Selector.collapsed);
-
-    if (isOpen) {
-      this.collapse();
-    } else {
-      this.expand();
-    }
-  };
-
-  BoxWidget.prototype.expand = function () {
-    var expandedEvent = $.Event(Event.expanded);
-    var expandingEvent = $.Event(Event.expanding);
-    var collapseIcon  = this.options.collapseIcon;
-    var expandIcon    = this.options.expandIcon;
-
-    $(this.element).removeClass(ClassName.collapsed);
-
-    $(this.element)
-      .children(Selector.header + ', ' + Selector.body + ', ' + Selector.footer)
-      .children(Selector.tools)
-      .find('.' + expandIcon)
-      .removeClass(expandIcon)
-      .addClass(collapseIcon);
-
-    $(this.element).children(Selector.body + ', ' + Selector.footer)
-      .slideDown(this.options.animationSpeed, function () {
-        $(this.element).trigger(expandedEvent);
-      }.bind(this))
-      .trigger(expandingEvent);
-  };
-
-  BoxWidget.prototype.collapse = function () {
-    var collapsedEvent = $.Event(Event.collapsed);
-    var collapsingEvent = $.Event(Event.collapsing);
-    var collapseIcon   = this.options.collapseIcon;
-    var expandIcon     = this.options.expandIcon;
-
-    $(this.element)
-      .children(Selector.header + ', ' + Selector.body + ', ' + Selector.footer)
-      .children(Selector.tools)
-      .find('.' + collapseIcon)
-      .removeClass(collapseIcon)
-      .addClass(expandIcon);
-
-    $(this.element).children(Selector.body + ', ' + Selector.footer)
-      .slideUp(this.options.animationSpeed, function () {
-        $(this.element).addClass(ClassName.collapsed);
-        $(this.element).trigger(collapsedEvent);
-      }.bind(this))
-      .trigger(expandingEvent);
-  };
-
-  BoxWidget.prototype.remove = function () {
-    var removedEvent = $.Event(Event.removed);
-    var removingEvent = $.Event(Event.removing);
-
-    $(this.element).slideUp(this.options.animationSpeed, function () {
-      $(this.element).trigger(removedEvent);
-      $(this.element).remove();
-    }.bind(this))
-    .trigger(removingEvent);
-  };
-
-  // Private
-
-  BoxWidget.prototype._setUpListeners = function () {
-    var that = this;
-
-    $(this.element).on('click', this.options.collapseTrigger, function (event) {
-      if (event) event.preventDefault();
-      that.toggle($(this));
-      return false;
-    });
-
-    $(this.element).on('click', this.options.removeTrigger, function (event) {
-      if (event) event.preventDefault();
-      that.remove($(this));
-      return false;
-    });
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, (data = new BoxWidget($this, options)));
-      }
-
-      if (typeof option == 'string') {
-        if (typeof data[option] == 'undefined') {
-          throw new Error('No method named ' + option);
+    /**
+     * --------------------------------------------
+     * @file AdminLTE layout.ts
+     * @description Layout for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * ------------------------------------------------------------------------
+     * Constants
+     * ------------------------------------------------------------------------
+     */
+    const CLASS_NAME_HOLD_TRANSITIONS = 'hold-transition';
+    const CLASS_NAME_APP_LOADED = 'app-loaded';
+    /**
+     * Class Definition
+     * ====================================================
+     */
+    class Layout {
+        constructor(element) {
+            this._element = element;
         }
-        data[option]();
-      }
+        holdTransition() {
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                document.body.classList.add(CLASS_NAME_HOLD_TRANSITIONS);
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    document.body.classList.remove(CLASS_NAME_HOLD_TRANSITIONS);
+                }, 400);
+            });
+        }
+    }
+    onDOMContentLoaded(() => {
+        const data = new Layout(document.body);
+        data.holdTransition();
+        setTimeout(() => {
+            document.body.classList.add(CLASS_NAME_APP_LOADED);
+        }, 400);
     });
-  }
 
-  var old = $.fn.boxWidget;
-
-  $.fn.boxWidget             = Plugin;
-  $.fn.boxWidget.Constructor = BoxWidget;
-
-  // No Conflict Mode
-  // ================
-  $.fn.boxWidget.noConflict = function () {
-    $.fn.boxWidget = old;
-    return this;
-  };
-
-  // BoxWidget Data API
-  // ==================
-  $(window).on('load', function () {
-    $(Selector.data).each(function () {
-      Plugin.call($(this));
-    });
-  });
-}(jQuery);
-
-
-/* ControlSidebar()
- * ===============
- * Toggles the state of the control sidebar
- *
- * @Usage: $('#control-sidebar-trigger').controlSidebar(options)
- *         or add [data-toggle="control-sidebar"] to the trigger
- *         Pass any option as data-option="value"
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.controlsidebar';
-
-  var Default = {
-    slide: true
-  };
-
-  var Selector = {
-    sidebar: '.control-sidebar',
-    data   : '[data-toggle="control-sidebar"]',
-    open   : '.control-sidebar-open',
-    bg     : '.control-sidebar-bg',
-    wrapper: '.wrapper',
-    content: '.content-wrapper',
-    boxed  : '.layout-boxed'
-  };
-
-  var ClassName = {
-    open : 'control-sidebar-open',
-    fixed: 'fixed'
-  };
-
-  var Event = {
-    collapsed: 'collapsed.controlsidebar',
-    expanded : 'expanded.controlsidebar'
-  };
-
-  // ControlSidebar Class Definition
-  // ===============================
-  var ControlSidebar = function (element, options) {
-    this.element         = element;
-    this.options         = options;
-    this.hasBindedResize = false;
-
-    this.init();
-  };
-
-  ControlSidebar.prototype.init = function () {
-    // Add click listener if the element hasn't been
-    // initialized using the data API
-    if (!$(this.element).is(Selector.data)) {
-      $(this).on('click', this.toggle);
+    /**
+     * --------------------------------------------
+     * @file AdminLTE push-menu.ts
+     * @description Push menu for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * ------------------------------------------------------------------------
+     * Constants
+     * ------------------------------------------------------------------------
+     */
+    const DATA_KEY$4 = 'lte.push-menu';
+    const EVENT_KEY$4 = `.${DATA_KEY$4}`;
+    const EVENT_OPEN = `open${EVENT_KEY$4}`;
+    const EVENT_COLLAPSE = `collapse${EVENT_KEY$4}`;
+    const CLASS_NAME_SIDEBAR_MINI = 'sidebar-mini';
+    const CLASS_NAME_SIDEBAR_COLLAPSE = 'sidebar-collapse';
+    const CLASS_NAME_SIDEBAR_OPEN = 'sidebar-open';
+    const CLASS_NAME_SIDEBAR_EXPAND = 'sidebar-expand';
+    const CLASS_NAME_SIDEBAR_OVERLAY = 'sidebar-overlay';
+    const CLASS_NAME_MENU_OPEN$1 = 'menu-open';
+    const SELECTOR_APP_SIDEBAR = '.app-sidebar';
+    const SELECTOR_SIDEBAR_MENU = '.sidebar-menu';
+    const SELECTOR_NAV_ITEM$1 = '.nav-item';
+    const SELECTOR_NAV_TREEVIEW = '.nav-treeview';
+    const SELECTOR_APP_WRAPPER = '.app-wrapper';
+    const SELECTOR_SIDEBAR_EXPAND = `[class*="${CLASS_NAME_SIDEBAR_EXPAND}"]`;
+    const SELECTOR_SIDEBAR_TOGGLE = '[data-lte-toggle="sidebar"]';
+    const Defaults = {
+        sidebarBreakpoint: 992
+    };
+    /**
+     * Class Definition
+     * ====================================================
+     */
+    class PushMenu {
+        constructor(element, config) {
+            this._element = element;
+            this._config = Object.assign(Object.assign({}, Defaults), config);
+        }
+        menusClose() {
+            const navTreeview = document.querySelectorAll(SELECTOR_NAV_TREEVIEW);
+            navTreeview.forEach(navTree => {
+                navTree.style.removeProperty('display');
+                navTree.style.removeProperty('height');
+            });
+            const navSidebar = document.querySelector(SELECTOR_SIDEBAR_MENU);
+            const navItem = navSidebar === null || navSidebar === void 0 ? void 0 : navSidebar.querySelectorAll(SELECTOR_NAV_ITEM$1);
+            if (navItem) {
+                navItem.forEach(navI => {
+                    navI.classList.remove(CLASS_NAME_MENU_OPEN$1);
+                });
+            }
+        }
+        expand() {
+            const event = new Event(EVENT_OPEN);
+            document.body.classList.remove(CLASS_NAME_SIDEBAR_COLLAPSE);
+            document.body.classList.add(CLASS_NAME_SIDEBAR_OPEN);
+            this._element.dispatchEvent(event);
+        }
+        collapse() {
+            const event = new Event(EVENT_COLLAPSE);
+            document.body.classList.remove(CLASS_NAME_SIDEBAR_OPEN);
+            document.body.classList.add(CLASS_NAME_SIDEBAR_COLLAPSE);
+            this._element.dispatchEvent(event);
+        }
+        addSidebarBreakPoint() {
+            var _a, _b, _c;
+            const sidebarExpandList = (_b = (_a = document.querySelector(SELECTOR_SIDEBAR_EXPAND)) === null || _a === void 0 ? void 0 : _a.classList) !== null && _b !== void 0 ? _b : [];
+            const sidebarExpand = (_c = Array.from(sidebarExpandList).find(className => className.startsWith(CLASS_NAME_SIDEBAR_EXPAND))) !== null && _c !== void 0 ? _c : '';
+            const sidebar = document.getElementsByClassName(sidebarExpand)[0];
+            const sidebarContent = globalThis.getComputedStyle(sidebar, '::before').getPropertyValue('content');
+            this._config = Object.assign(Object.assign({}, this._config), { sidebarBreakpoint: Number(sidebarContent.replace(/[^\d.-]/g, '')) });
+            if (window.innerWidth <= this._config.sidebarBreakpoint) {
+                this.collapse();
+            }
+            else {
+                if (!document.body.classList.contains(CLASS_NAME_SIDEBAR_MINI)) {
+                    this.expand();
+                }
+                if (document.body.classList.contains(CLASS_NAME_SIDEBAR_MINI) && document.body.classList.contains(CLASS_NAME_SIDEBAR_COLLAPSE)) {
+                    this.collapse();
+                }
+            }
+        }
+        toggle() {
+            if (document.body.classList.contains(CLASS_NAME_SIDEBAR_COLLAPSE)) {
+                this.expand();
+            }
+            else {
+                this.collapse();
+            }
+        }
+        init() {
+            this.addSidebarBreakPoint();
+        }
     }
-
-    this.fix();
-    $(window).resize(function () {
-      this.fix();
-    }.bind(this));
-  };
-
-  ControlSidebar.prototype.toggle = function (event) {
-    if (event) event.preventDefault();
-
-    this.fix();
-
-    if (!$(Selector.sidebar).is(Selector.open) && !$('body').is(Selector.open)) {
-      this.expand();
-    } else {
-      this.collapse();
-    }
-  };
-
-  ControlSidebar.prototype.expand = function () {
-    if (!this.options.slide) {
-      $('body').addClass(ClassName.open);
-    } else {
-      $(Selector.sidebar).addClass(ClassName.open);
-    }
-
-    $(this.element).trigger($.Event(Event.expanded));
-  };
-
-  ControlSidebar.prototype.collapse = function () {
-    $('body, ' + Selector.sidebar).removeClass(ClassName.open);
-    $(this.element).trigger($.Event(Event.collapsed));
-  };
-
-  ControlSidebar.prototype.fix = function () {
-    if ($('body').is(Selector.boxed)) {
-      this._fixForBoxed($(Selector.bg));
-    }
-  };
-
-  // Private
-
-  ControlSidebar.prototype._fixForBoxed = function (bg) {
-    bg.css({
-      position: 'absolute',
-      height  : $(Selector.wrapper).height()
-    });
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, (data = new ControlSidebar($this, options)));
-      }
-
-      if (typeof option == 'string') data.toggle();
-    });
-  }
-
-  var old = $.fn.controlSidebar;
-
-  $.fn.controlSidebar             = Plugin;
-  $.fn.controlSidebar.Constructor = ControlSidebar;
-
-  // No Conflict Mode
-  // ================
-  $.fn.controlSidebar.noConflict = function () {
-    $.fn.controlSidebar = old;
-    return this;
-  };
-
-  // ControlSidebar Data API
-  // =======================
-  $(document).on('click', Selector.data, function (event) {
-    if (event) event.preventDefault();
-    Plugin.call($(this), 'toggle');
-  });
-
-}(jQuery);
-
-
-/* DirectChat()
- * ===============
- * Toggles the state of the control sidebar
- *
- * @Usage: $('#my-chat-box').directChat()
- *         or add [data-widget="direct-chat"] to the trigger
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.directchat';
-
-  var Selector = {
-    data: '[data-widget="chat-pane-toggle"]',
-    box : '.direct-chat'
-  };
-
-  var ClassName = {
-    open: 'direct-chat-contacts-open'
-  };
-
-  // DirectChat Class Definition
-  // ===========================
-  var DirectChat = function (element) {
-    this.element = element;
-  };
-
-  DirectChat.prototype.toggle = function ($trigger) {
-    $trigger.parents(Selector.box).first().toggleClass(ClassName.open);
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        $this.data(DataKey, (data = new DirectChat($this)));
-      }
-
-      if (typeof option == 'string') data.toggle($this);
-    });
-  }
-
-  var old = $.fn.directChat;
-
-  $.fn.directChat             = Plugin;
-  $.fn.directChat.Constructor = DirectChat;
-
-  // No Conflict Mode
-  // ================
-  $.fn.directChat.noConflict = function () {
-    $.fn.directChat = old;
-    return this;
-  };
-
-  // DirectChat Data API
-  // ===================
-  $(document).on('click', Selector.data, function (event) {
-    if (event) event.preventDefault();
-    Plugin.call($(this), 'toggle');
-  });
-
-}(jQuery);
-
-
-/* Layout()
- * ========
- * Implements AdminLTE layout.
- * Fixes the layout height in case min-height fails.
- *
- * @usage activated automatically upon window load.
- *        Configure any options by passing data-option="value"
- *        to the body tag.
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.layout';
-
-  var Default = {
-    slimscroll : true,
-    resetHeight: true
-  };
-
-  var Selector = {
-    wrapper       : '.wrapper',
-    contentWrapper: '.content-wrapper',
-    layoutBoxed   : '.layout-boxed',
-    mainFooter    : '.main-footer',
-    mainHeader    : '.main-header',
-    sidebar       : '.sidebar',
-    controlSidebar: '.control-sidebar',
-    fixed         : '.fixed',
-    sidebarMenu   : '.sidebar-menu',
-    logo          : '.main-header .logo'
-  };
-
-  var ClassName = {
-    fixed         : 'fixed',
-    holdTransition: 'hold-transition'
-  };
-
-  var Layout = function (options) {
-    this.options      = options;
-    this.bindedResize = false;
-    this.activate();
-  };
-
-  Layout.prototype.activate = function () {
-    this.fix();
-    this.fixSidebar();
-
-    $('body').removeClass(ClassName.holdTransition);
-
-    if (this.options.resetHeight) {
-      $('body, html, ' + Selector.wrapper).css({
-        'height'    : 'auto',
-        'min-height': '100%'
-      });
-    }
-
-    if (!this.bindedResize) {
-      $(window).resize(function () {
-        this.fix();
-        this.fixSidebar();
-
-        $(Selector.logo + ', ' + Selector.sidebar).one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function () {
-          this.fix();
-          this.fixSidebar();
-        }.bind(this));
-      }.bind(this));
-
-      this.bindedResize = true;
-    }
-
-    $(Selector.sidebarMenu).on('expanded.tree', function () {
-      this.fix();
-      this.fixSidebar();
-    }.bind(this));
-
-    $(Selector.sidebarMenu).on('collapsed.tree', function () {
-      this.fix();
-      this.fixSidebar();
-    }.bind(this));
-  };
-
-  Layout.prototype.fix = function () {
-    // Remove overflow from .wrapper if layout-boxed exists
-    $(Selector.layoutBoxed + ' > ' + Selector.wrapper).css('overflow', 'hidden');
-
-    // Get window height and the wrapper height
-    var footerHeight = $(Selector.mainFooter).outerHeight() || 0;
-    var headerHeight  = $(Selector.mainHeader).outerHeight() || 0;
-    var neg           = headerHeight + footerHeight;
-    var windowHeight  = $(window).height();
-    var sidebarHeight = $(Selector.sidebar).height() || 0;
-
-    // Set the min-height of the content and sidebar based on
-    // the height of the document.
-    if ($('body').hasClass(ClassName.fixed)) {
-      $(Selector.contentWrapper).css('min-height', windowHeight - footerHeight);
-    } else {
-      var postSetHeight;
-
-      if (windowHeight >= sidebarHeight + headerHeight) {
-        $(Selector.contentWrapper).css('min-height', windowHeight - neg);
-        postSetHeight = windowHeight - neg;
-      } else {
-        $(Selector.contentWrapper).css('min-height', sidebarHeight);
-        postSetHeight = sidebarHeight;
-      }
-
-      // Fix for the control sidebar height
-      var $controlSidebar = $(Selector.controlSidebar);
-      if (typeof $controlSidebar !== 'undefined') {
-        if ($controlSidebar.height() > postSetHeight)
-          $(Selector.contentWrapper).css('min-height', $controlSidebar.height());
-      }
-    }
-  };
-
-  Layout.prototype.fixSidebar = function () {
-    // Make sure the body tag has the .fixed class
-    if (!$('body').hasClass(ClassName.fixed)) {
-      if (typeof $.fn.slimScroll !== 'undefined') {
-        $(Selector.sidebar).slimScroll({ destroy: true }).height('auto');
-      }
-      return;
-    }
-
-    // Enable slimscroll for fixed layout
-    if (this.options.slimscroll) {
-      if (typeof $.fn.slimScroll !== 'undefined') {
-        // Destroy if it exists
-        // $(Selector.sidebar).slimScroll({ destroy: true }).height('auto')
-
-        // Add slimscroll
-        $(Selector.sidebar).slimScroll({
-          height: ($(window).height() - $(Selector.mainHeader).height()) + 'px'
+    /**
+     * ------------------------------------------------------------------------
+     * Data Api implementation
+     * ------------------------------------------------------------------------
+     */
+    onDOMContentLoaded(() => {
+        var _a;
+        const sidebar = document === null || document === void 0 ? void 0 : document.querySelector(SELECTOR_APP_SIDEBAR);
+        if (sidebar) {
+            const data = new PushMenu(sidebar, Defaults);
+            data.init();
+            window.addEventListener('resize', () => {
+                data.init();
+            });
+        }
+        const sidebarOverlay = document.createElement('div');
+        sidebarOverlay.className = CLASS_NAME_SIDEBAR_OVERLAY;
+        (_a = document.querySelector(SELECTOR_APP_WRAPPER)) === null || _a === void 0 ? void 0 : _a.append(sidebarOverlay);
+        sidebarOverlay.addEventListener('touchstart', event => {
+            event.preventDefault();
+            const target = event.currentTarget;
+            const data = new PushMenu(target, Defaults);
+            data.collapse();
+        }, { passive: true });
+        sidebarOverlay.addEventListener('click', event => {
+            event.preventDefault();
+            const target = event.currentTarget;
+            const data = new PushMenu(target, Defaults);
+            data.collapse();
         });
-      }
-    }
-  };
+        const fullBtn = document.querySelectorAll(SELECTOR_SIDEBAR_TOGGLE);
+        fullBtn.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                let button = event.currentTarget;
+                if ((button === null || button === void 0 ? void 0 : button.dataset.lteToggle) !== 'sidebar') {
+                    button = button === null || button === void 0 ? void 0 : button.closest(SELECTOR_SIDEBAR_TOGGLE);
+                }
+                if (button) {
+                    event === null || event === void 0 ? void 0 : event.preventDefault();
+                    const data = new PushMenu(button, Defaults);
+                    data.toggle();
+                }
+            });
+        });
+    });
 
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option === 'object' && option);
-        $this.data(DataKey, (data = new Layout(options)));
-      }
-
-      if (typeof option === 'string') {
-        if (typeof data[option] === 'undefined') {
-          throw new Error('No method named ' + option);
+    /**
+     * --------------------------------------------
+     * @file AdminLTE treeview.ts
+     * @description Treeview plugin for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * ------------------------------------------------------------------------
+     * Constants
+     * ------------------------------------------------------------------------
+     */
+    // const NAME = 'Treeview'
+    const DATA_KEY$3 = 'lte.treeview';
+    const EVENT_KEY$3 = `.${DATA_KEY$3}`;
+    const EVENT_EXPANDED$2 = `expanded${EVENT_KEY$3}`;
+    const EVENT_COLLAPSED$2 = `collapsed${EVENT_KEY$3}`;
+    // const EVENT_LOAD_DATA_API = `load${EVENT_KEY}`
+    const CLASS_NAME_MENU_OPEN = 'menu-open';
+    const SELECTOR_NAV_ITEM = '.nav-item';
+    const SELECTOR_NAV_LINK = '.nav-link';
+    const SELECTOR_TREEVIEW_MENU = '.nav-treeview';
+    const SELECTOR_DATA_TOGGLE$1 = '[data-lte-toggle="treeview"]';
+    const Default$1 = {
+        animationSpeed: 300,
+        accordion: true
+    };
+    /**
+     * Class Definition
+     * ====================================================
+     */
+    class Treeview {
+        constructor(element, config) {
+            this._element = element;
+            this._config = Object.assign(Object.assign({}, Default$1), config);
         }
-        data[option]();
-      }
-    });
-  }
-
-  var old = $.fn.layout;
-
-  $.fn.layout            = Plugin;
-  $.fn.layout.Constuctor = Layout;
-
-  // No conflict mode
-  // ================
-  $.fn.layout.noConflict = function () {
-    $.fn.layout = old;
-    return this;
-  };
-
-  // Layout DATA-API
-  // ===============
-  $(window).on('load', function () {
-    Plugin.call($('body'));
-  });
-}(jQuery);
-
-
-/* PushMenu()
- * ==========
- * Adds the push menu functionality to the sidebar.
- *
- * @usage: $('.btn').pushMenu(options)
- *          or add [data-toggle="push-menu"] to any button
- *          Pass any option as data-option="value"
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.pushmenu';
-
-  var Default = {
-    collapseScreenSize   : 767,
-    expandOnHover        : false,
-    expandTransitionDelay: 200
-  };
-
-  var Selector = {
-    collapsed     : '.sidebar-collapse',
-    open          : '.sidebar-open',
-    mainSidebar   : '.main-sidebar',
-    contentWrapper: '.content-wrapper',
-    searchInput   : '.sidebar-form .form-control',
-    button        : '[data-toggle="push-menu"]',
-    mini          : '.sidebar-mini',
-    expanded      : '.sidebar-expanded-on-hover',
-    layoutFixed   : '.fixed'
-  };
-
-  var ClassName = {
-    collapsed    : 'sidebar-collapse',
-    open         : 'sidebar-open',
-    mini         : 'sidebar-mini',
-    expanded     : 'sidebar-expanded-on-hover',
-    expandFeature: 'sidebar-mini-expand-feature',
-    layoutFixed  : 'fixed'
-  };
-
-  var Event = {
-    expanded : 'expanded.pushMenu',
-    collapsed: 'collapsed.pushMenu'
-  };
-
-  // PushMenu Class Definition
-  // =========================
-  var PushMenu = function (options) {
-    this.options = options;
-    this.init();
-  };
-
-  PushMenu.prototype.init = function () {
-    if (this.options.expandOnHover
-      || ($('body').is(Selector.mini + Selector.layoutFixed))) {
-      this.expandOnHover();
-      $('body').addClass(ClassName.expandFeature);
-    }
-
-    $(Selector.contentWrapper).click(function () {
-      // Enable hide menu when clicking on the content-wrapper on small screens
-      if ($(window).width() <= this.options.collapseScreenSize && $('body').hasClass(ClassName.open)) {
-        this.close();
-      }
-    }.bind(this));
-
-    // __Fix for android devices
-    $(Selector.searchInput).click(function (e) {
-      e.stopPropagation();
-    });
-  };
-
-  PushMenu.prototype.toggle = function () {
-    var windowWidth = $(window).width();
-    var isOpen      = !$('body').hasClass(ClassName.collapsed);
-
-    if (windowWidth <= this.options.collapseScreenSize) {
-      isOpen = $('body').hasClass(ClassName.open);
-    }
-
-    if (!isOpen) {
-      this.open();
-    } else {
-      this.close();
-    }
-  };
-
-  PushMenu.prototype.open = function () {
-    var windowWidth = $(window).width();
-
-    if (windowWidth > this.options.collapseScreenSize) {
-      $('body').removeClass(ClassName.collapsed)
-        .trigger($.Event(Event.expanded));
-    }
-    else {
-      $('body').addClass(ClassName.open)
-        .trigger($.Event(Event.expanded));
-    }
-  };
-
-  PushMenu.prototype.close = function () {
-    var windowWidth = $(window).width();
-    if (windowWidth > this.options.collapseScreenSize) {
-      $('body').addClass(ClassName.collapsed)
-        .trigger($.Event(Event.collapsed));
-    } else {
-      $('body').removeClass(ClassName.open + ' ' + ClassName.collapsed)
-        .trigger($.Event(Event.collapsed));
-    }
-  };
-
-  PushMenu.prototype.expandOnHover = function () {
-    $(Selector.mainSidebar).hover(function () {
-      if ($('body').is(Selector.mini + Selector.collapsed)
-        && $(window).width() > this.options.collapseScreenSize) {
-        this.expand();
-      }
-    }.bind(this), function () {
-      if ($('body').is(Selector.expanded)) {
-        this.collapse();
-      }
-    }.bind(this));
-  };
-
-  PushMenu.prototype.expand = function () {
-    setTimeout(function () {
-      $('body').removeClass(ClassName.collapsed)
-        .addClass(ClassName.expanded);
-    }, this.options.expandTransitionDelay);
-  };
-
-  PushMenu.prototype.collapse = function () {
-    setTimeout(function () {
-      $('body').removeClass(ClassName.expanded)
-        .addClass(ClassName.collapsed);
-    }, this.options.expandTransitionDelay);
-  };
-
-  // PushMenu Plugin Definition
-  // ==========================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, (data = new PushMenu(options)));
-      }
-
-      if (option === 'toggle') data.toggle();
-    });
-  }
-
-  var old = $.fn.pushMenu;
-
-  $.fn.pushMenu             = Plugin;
-  $.fn.pushMenu.Constructor = PushMenu;
-
-  // No Conflict Mode
-  // ================
-  $.fn.pushMenu.noConflict = function () {
-    $.fn.pushMenu = old;
-    return this;
-  };
-
-  // Data API
-  // ========
-  $(document).on('click', Selector.button, function (e) {
-    e.preventDefault();
-    Plugin.call($(this), 'toggle');
-  });
-  $(window).on('load', function () {
-    Plugin.call($(Selector.button));
-  });
-}(jQuery);
-
-
-/* TodoList()
- * =========
- * Converts a list into a todoList.
- *
- * @Usage: $('.my-list').todoList(options)
- *         or add [data-widget="todo-list"] to the ul element
- *         Pass any option as data-option="value"
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.todolist';
-
-  var Default = {
-    onCheck  : function (item) {
-      return item;
-    },
-    onUnCheck: function (item) {
-      return item;
-    }
-  };
-
-  var Selector = {
-    data: '[data-widget="todo-list"]'
-  };
-
-  var ClassName = {
-    done: 'done'
-  };
-
-  // TodoList Class Definition
-  // =========================
-  var TodoList = function (element, options) {
-    this.element = element;
-    this.options = options;
-
-    this._setUpListeners();
-  };
-
-  TodoList.prototype.toggle = function (item) {
-    item.parents(Selector.li).first().toggleClass(ClassName.done);
-    if (!item.prop('checked')) {
-      this.unCheck(item);
-      return;
-    }
-
-    this.check(item);
-  };
-
-  TodoList.prototype.check = function (item) {
-    this.options.onCheck.call(item);
-  };
-
-  TodoList.prototype.unCheck = function (item) {
-    this.options.onUnCheck.call(item);
-  };
-
-  // Private
-
-  TodoList.prototype._setUpListeners = function () {
-    var that = this;
-    $(this.element).on('change ifChanged', 'input:checkbox', function () {
-      that.toggle($(this));
-    });
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, (data = new TodoList($this, options)));
-      }
-
-      if (typeof data == 'string') {
-        if (typeof data[option] == 'undefined') {
-          throw new Error('No method named ' + option);
+        open() {
+            var _a, _b;
+            const event = new Event(EVENT_EXPANDED$2);
+            if (this._config.accordion) {
+                const openMenuList = (_a = this._element.parentElement) === null || _a === void 0 ? void 0 : _a.querySelectorAll(`${SELECTOR_NAV_ITEM}.${CLASS_NAME_MENU_OPEN}`);
+                openMenuList === null || openMenuList === void 0 ? void 0 : openMenuList.forEach(openMenu => {
+                    if (openMenu !== this._element.parentElement) {
+                        openMenu.classList.remove(CLASS_NAME_MENU_OPEN);
+                        const childElement = openMenu === null || openMenu === void 0 ? void 0 : openMenu.querySelector(SELECTOR_TREEVIEW_MENU);
+                        if (childElement) {
+                            slideUp(childElement, this._config.animationSpeed);
+                        }
+                    }
+                });
+            }
+            this._element.classList.add(CLASS_NAME_MENU_OPEN);
+            const childElement = (_b = this._element) === null || _b === void 0 ? void 0 : _b.querySelector(SELECTOR_TREEVIEW_MENU);
+            if (childElement) {
+                slideDown(childElement, this._config.animationSpeed);
+            }
+            this._element.dispatchEvent(event);
         }
-        data[option]();
-      }
-    });
-  }
-
-  var old = $.fn.todoList;
-
-  $.fn.todoList             = Plugin;
-  $.fn.todoList.Constructor = TodoList;
-
-  // No Conflict Mode
-  // ================
-  $.fn.todoList.noConflict = function () {
-    $.fn.todoList = old;
-    return this;
-  };
-
-  // TodoList Data API
-  // =================
-  $(window).on('load', function () {
-    $(Selector.data).each(function () {
-      Plugin.call($(this));
-    });
-  });
-
-}(jQuery);
-
-
-/* Tree()
- * ======
- * Converts a nested list into a multilevel
- * tree view menu.
- *
- * @Usage: $('.my-menu').tree(options)
- *         or add [data-widget="tree"] to the ul element
- *         Pass any option as data-option="value"
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.tree';
-
-  var Default = {
-    animationSpeed: 500,
-    accordion     : true,
-    followLink    : false,
-    trigger       : '.treeview a'
-  };
-
-  var Selector = {
-    tree        : '.tree',
-    treeview    : '.treeview',
-    treeviewMenu: '.treeview-menu',
-    open        : '.menu-open, .active',
-    li          : 'li',
-    data        : '[data-widget="tree"]',
-    active      : '.active'
-  };
-
-  var ClassName = {
-    open: 'menu-open',
-    tree: 'tree'
-  };
-
-  var Event = {
-    collapsed: 'collapsed.tree',
-    expanded : 'expanded.tree'
-  };
-
-  // Tree Class Definition
-  // =====================
-  var Tree = function (element, options) {
-    this.element = element;
-    this.options = options;
-
-    $(this.element).addClass(ClassName.tree);
-
-    $(Selector.treeview + Selector.active, this.element).addClass(ClassName.open);
-
-    this._setUpListeners();
-  };
-
-  Tree.prototype.toggle = function (link, event) {
-    var treeviewMenu = link.next(Selector.treeviewMenu);
-    var parentLi     = link.parent();
-    var isOpen       = parentLi.hasClass(ClassName.open);
-
-    if (!parentLi.is(Selector.treeview)) {
-      return;
+        close() {
+            var _a;
+            const event = new Event(EVENT_COLLAPSED$2);
+            this._element.classList.remove(CLASS_NAME_MENU_OPEN);
+            const childElement = (_a = this._element) === null || _a === void 0 ? void 0 : _a.querySelector(SELECTOR_TREEVIEW_MENU);
+            if (childElement) {
+                slideUp(childElement, this._config.animationSpeed);
+            }
+            this._element.dispatchEvent(event);
+        }
+        toggle() {
+            if (this._element.classList.contains(CLASS_NAME_MENU_OPEN)) {
+                this.close();
+            }
+            else {
+                this.open();
+            }
+        }
     }
-
-    if (!this.options.followLink || link.attr('href') === '#') {
-      event.preventDefault();
-    }
-
-    if (isOpen) {
-      this.collapse(treeviewMenu, parentLi);
-    } else {
-      this.expand(treeviewMenu, parentLi);
-    }
-  };
-
-  Tree.prototype.expand = function (tree, parent) {
-    var expandedEvent = $.Event(Event.expanded);
-
-    if (this.options.accordion) {
-      var openMenuLi = parent.siblings(Selector.open);
-      var openTree   = openMenuLi.children(Selector.treeviewMenu);
-      this.collapse(openTree, openMenuLi);
-    }
-
-    parent.addClass(ClassName.open);
-    tree.slideDown(this.options.animationSpeed, function () {
-      $(this.element).trigger(expandedEvent);
-    }.bind(this));
-  };
-
-  Tree.prototype.collapse = function (tree, parentLi) {
-    var collapsedEvent = $.Event(Event.collapsed);
-
-    //tree.find(Selector.open).removeClass(ClassName.open);
-    parentLi.removeClass(ClassName.open);
-    tree.slideUp(this.options.animationSpeed, function () {
-      //tree.find(Selector.open + ' > ' + Selector.treeview).slideUp();
-      $(this.element).trigger(collapsedEvent);
-    }.bind(this));
-  };
-
-  // Private
-
-  Tree.prototype._setUpListeners = function () {
-    var that = this;
-
-    $(this.element).on('click', this.options.trigger, function (event) {
-      that.toggle($(this), event);
+    /**
+     * ------------------------------------------------------------------------
+     * Data Api implementation
+     * ------------------------------------------------------------------------
+     */
+    onDOMContentLoaded(() => {
+        const button = document.querySelectorAll(SELECTOR_DATA_TOGGLE$1);
+        button.forEach(btn => {
+            btn.addEventListener('click', event => {
+                const target = event.target;
+                const targetItem = target.closest(SELECTOR_NAV_ITEM);
+                const targetLink = target.closest(SELECTOR_NAV_LINK);
+                if ((target === null || target === void 0 ? void 0 : target.getAttribute('href')) === '#' || (targetLink === null || targetLink === void 0 ? void 0 : targetLink.getAttribute('href')) === '#') {
+                    event.preventDefault();
+                }
+                if (targetItem) {
+                    const data = new Treeview(targetItem, Default$1);
+                    data.toggle();
+                }
+            });
+        });
     });
-  };
 
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        $this.data(DataKey, new Tree($this, options));
-      }
+    /**
+     * --------------------------------------------
+     * @file AdminLTE direct-chat.ts
+     * @description Direct chat for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * Constants
+     * ====================================================
+     */
+    const DATA_KEY$2 = 'lte.direct-chat';
+    const EVENT_KEY$2 = `.${DATA_KEY$2}`;
+    const EVENT_EXPANDED$1 = `expanded${EVENT_KEY$2}`;
+    const EVENT_COLLAPSED$1 = `collapsed${EVENT_KEY$2}`;
+    const SELECTOR_DATA_TOGGLE = '[data-lte-toggle="chat-pane"]';
+    const SELECTOR_DIRECT_CHAT = '.direct-chat';
+    const CLASS_NAME_DIRECT_CHAT_OPEN = 'direct-chat-contacts-open';
+    /**
+     * Class Definition
+     * ====================================================
+     */
+    class DirectChat {
+        constructor(element) {
+            this._element = element;
+        }
+        toggle() {
+            if (this._element.classList.contains(CLASS_NAME_DIRECT_CHAT_OPEN)) {
+                const event = new Event(EVENT_COLLAPSED$1);
+                this._element.classList.remove(CLASS_NAME_DIRECT_CHAT_OPEN);
+                this._element.dispatchEvent(event);
+            }
+            else {
+                const event = new Event(EVENT_EXPANDED$1);
+                this._element.classList.add(CLASS_NAME_DIRECT_CHAT_OPEN);
+                this._element.dispatchEvent(event);
+            }
+        }
+    }
+    /**
+     *
+     * Data Api implementation
+     * ====================================================
+     */
+    onDOMContentLoaded(() => {
+        const button = document.querySelectorAll(SELECTOR_DATA_TOGGLE);
+        button.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                const target = event.target;
+                const chatPane = target.closest(SELECTOR_DIRECT_CHAT);
+                if (chatPane) {
+                    const data = new DirectChat(chatPane);
+                    data.toggle();
+                }
+            });
+        });
     });
-  }
 
-  var old = $.fn.tree;
-
-  $.fn.tree             = Plugin;
-  $.fn.tree.Constructor = Tree;
-
-  // No Conflict Mode
-  // ================
-  $.fn.tree.noConflict = function () {
-    $.fn.tree = old;
-    return this;
-  };
-
-  // Tree Data API
-  // =============
-  $(window).on('load', function () {
-    $(Selector.data).each(function () {
-      Plugin.call($(this));
+    /**
+     * --------------------------------------------
+     * @file AdminLTE card-widget.ts
+     * @description Card widget for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * Constants
+     * ====================================================
+     */
+    const DATA_KEY$1 = 'lte.card-widget';
+    const EVENT_KEY$1 = `.${DATA_KEY$1}`;
+    const EVENT_COLLAPSED = `collapsed${EVENT_KEY$1}`;
+    const EVENT_EXPANDED = `expanded${EVENT_KEY$1}`;
+    const EVENT_REMOVE = `remove${EVENT_KEY$1}`;
+    const EVENT_MAXIMIZED$1 = `maximized${EVENT_KEY$1}`;
+    const EVENT_MINIMIZED$1 = `minimized${EVENT_KEY$1}`;
+    const CLASS_NAME_CARD = 'card';
+    const CLASS_NAME_COLLAPSED = 'collapsed-card';
+    const CLASS_NAME_COLLAPSING = 'collapsing-card';
+    const CLASS_NAME_EXPANDING = 'expanding-card';
+    const CLASS_NAME_WAS_COLLAPSED = 'was-collapsed';
+    const CLASS_NAME_MAXIMIZED = 'maximized-card';
+    const SELECTOR_DATA_REMOVE = '[data-lte-toggle="card-remove"]';
+    const SELECTOR_DATA_COLLAPSE = '[data-lte-toggle="card-collapse"]';
+    const SELECTOR_DATA_MAXIMIZE = '[data-lte-toggle="card-maximize"]';
+    const SELECTOR_CARD = `.${CLASS_NAME_CARD}`;
+    const SELECTOR_CARD_BODY = '.card-body';
+    const SELECTOR_CARD_FOOTER = '.card-footer';
+    const Default = {
+        animationSpeed: 500,
+        collapseTrigger: SELECTOR_DATA_COLLAPSE,
+        removeTrigger: SELECTOR_DATA_REMOVE,
+        maximizeTrigger: SELECTOR_DATA_MAXIMIZE
+    };
+    class CardWidget {
+        constructor(element, config) {
+            this._element = element;
+            this._parent = element.closest(SELECTOR_CARD);
+            if (element.classList.contains(CLASS_NAME_CARD)) {
+                this._parent = element;
+            }
+            this._config = Object.assign(Object.assign({}, Default), config);
+        }
+        collapse() {
+            var _a, _b;
+            const event = new Event(EVENT_COLLAPSED);
+            if (this._parent) {
+                this._parent.classList.add(CLASS_NAME_COLLAPSING);
+                const elm = (_a = this._parent) === null || _a === void 0 ? void 0 : _a.querySelectorAll(`${SELECTOR_CARD_BODY}, ${SELECTOR_CARD_FOOTER}`);
+                elm.forEach(el => {
+                    if (el instanceof HTMLElement) {
+                        slideUp(el, this._config.animationSpeed);
+                    }
+                });
+                setTimeout(() => {
+                    if (this._parent) {
+                        this._parent.classList.add(CLASS_NAME_COLLAPSED);
+                        this._parent.classList.remove(CLASS_NAME_COLLAPSING);
+                    }
+                }, this._config.animationSpeed);
+            }
+            (_b = this._element) === null || _b === void 0 ? void 0 : _b.dispatchEvent(event);
+        }
+        expand() {
+            var _a, _b;
+            const event = new Event(EVENT_EXPANDED);
+            if (this._parent) {
+                this._parent.classList.add(CLASS_NAME_EXPANDING);
+                const elm = (_a = this._parent) === null || _a === void 0 ? void 0 : _a.querySelectorAll(`${SELECTOR_CARD_BODY}, ${SELECTOR_CARD_FOOTER}`);
+                elm.forEach(el => {
+                    if (el instanceof HTMLElement) {
+                        slideDown(el, this._config.animationSpeed);
+                    }
+                });
+                setTimeout(() => {
+                    if (this._parent) {
+                        this._parent.classList.remove(CLASS_NAME_COLLAPSED, CLASS_NAME_EXPANDING);
+                    }
+                }, this._config.animationSpeed);
+            }
+            (_b = this._element) === null || _b === void 0 ? void 0 : _b.dispatchEvent(event);
+        }
+        remove() {
+            var _a;
+            const event = new Event(EVENT_REMOVE);
+            if (this._parent) {
+                slideUp(this._parent, this._config.animationSpeed);
+            }
+            (_a = this._element) === null || _a === void 0 ? void 0 : _a.dispatchEvent(event);
+        }
+        toggle() {
+            var _a;
+            if ((_a = this._parent) === null || _a === void 0 ? void 0 : _a.classList.contains(CLASS_NAME_COLLAPSED)) {
+                this.expand();
+                return;
+            }
+            this.collapse();
+        }
+        maximize() {
+            var _a;
+            const event = new Event(EVENT_MAXIMIZED$1);
+            if (this._parent) {
+                this._parent.style.height = `${this._parent.offsetHeight}px`;
+                this._parent.style.width = `${this._parent.offsetWidth}px`;
+                this._parent.style.transition = 'all .15s';
+                setTimeout(() => {
+                    const htmlTag = document.querySelector('html');
+                    if (htmlTag) {
+                        htmlTag.classList.add(CLASS_NAME_MAXIMIZED);
+                    }
+                    if (this._parent) {
+                        this._parent.classList.add(CLASS_NAME_MAXIMIZED);
+                        if (this._parent.classList.contains(CLASS_NAME_COLLAPSED)) {
+                            this._parent.classList.add(CLASS_NAME_WAS_COLLAPSED);
+                        }
+                    }
+                }, 150);
+            }
+            (_a = this._element) === null || _a === void 0 ? void 0 : _a.dispatchEvent(event);
+        }
+        minimize() {
+            var _a;
+            const event = new Event(EVENT_MINIMIZED$1);
+            if (this._parent) {
+                this._parent.style.height = 'auto';
+                this._parent.style.width = 'auto';
+                this._parent.style.transition = 'all .15s';
+                setTimeout(() => {
+                    var _a;
+                    const htmlTag = document.querySelector('html');
+                    if (htmlTag) {
+                        htmlTag.classList.remove(CLASS_NAME_MAXIMIZED);
+                    }
+                    if (this._parent) {
+                        this._parent.classList.remove(CLASS_NAME_MAXIMIZED);
+                        if ((_a = this._parent) === null || _a === void 0 ? void 0 : _a.classList.contains(CLASS_NAME_WAS_COLLAPSED)) {
+                            this._parent.classList.remove(CLASS_NAME_WAS_COLLAPSED);
+                        }
+                    }
+                }, 10);
+            }
+            (_a = this._element) === null || _a === void 0 ? void 0 : _a.dispatchEvent(event);
+        }
+        toggleMaximize() {
+            var _a;
+            if ((_a = this._parent) === null || _a === void 0 ? void 0 : _a.classList.contains(CLASS_NAME_MAXIMIZED)) {
+                this.minimize();
+                return;
+            }
+            this.maximize();
+        }
+    }
+    /**
+     *
+     * Data Api implementation
+     * ====================================================
+     */
+    onDOMContentLoaded(() => {
+        const collapseBtn = document.querySelectorAll(SELECTOR_DATA_COLLAPSE);
+        collapseBtn.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                const target = event.target;
+                const data = new CardWidget(target, Default);
+                data.toggle();
+            });
+        });
+        const removeBtn = document.querySelectorAll(SELECTOR_DATA_REMOVE);
+        removeBtn.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                const target = event.target;
+                const data = new CardWidget(target, Default);
+                data.remove();
+            });
+        });
+        const maxBtn = document.querySelectorAll(SELECTOR_DATA_MAXIMIZE);
+        maxBtn.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                const target = event.target;
+                const data = new CardWidget(target, Default);
+                data.toggleMaximize();
+            });
+        });
     });
-  });
 
-}(jQuery);
+    /**
+     * --------------------------------------------
+     * @file AdminLTE fullscreen.ts
+     * @description Fullscreen plugin for AdminLTE.
+     * @license MIT
+     * --------------------------------------------
+     */
+    /**
+     * Constants
+     * ============================================================================
+     */
+    const DATA_KEY = 'lte.fullscreen';
+    const EVENT_KEY = `.${DATA_KEY}`;
+    const EVENT_MAXIMIZED = `maximized${EVENT_KEY}`;
+    const EVENT_MINIMIZED = `minimized${EVENT_KEY}`;
+    const SELECTOR_FULLSCREEN_TOGGLE = '[data-lte-toggle="fullscreen"]';
+    const SELECTOR_MAXIMIZE_ICON = '[data-lte-icon="maximize"]';
+    const SELECTOR_MINIMIZE_ICON = '[data-lte-icon="minimize"]';
+    /**
+     * Class Definition.
+     * ============================================================================
+     */
+    class FullScreen {
+        constructor(element, config) {
+            this._element = element;
+            this._config = config;
+        }
+        inFullScreen() {
+            const event = new Event(EVENT_MAXIMIZED);
+            const iconMaximize = document.querySelector(SELECTOR_MAXIMIZE_ICON);
+            const iconMinimize = document.querySelector(SELECTOR_MINIMIZE_ICON);
+            void document.documentElement.requestFullscreen();
+            if (iconMaximize) {
+                iconMaximize.style.display = 'none';
+            }
+            if (iconMinimize) {
+                iconMinimize.style.display = 'block';
+            }
+            this._element.dispatchEvent(event);
+        }
+        outFullscreen() {
+            const event = new Event(EVENT_MINIMIZED);
+            const iconMaximize = document.querySelector(SELECTOR_MAXIMIZE_ICON);
+            const iconMinimize = document.querySelector(SELECTOR_MINIMIZE_ICON);
+            void document.exitFullscreen();
+            if (iconMaximize) {
+                iconMaximize.style.display = 'block';
+            }
+            if (iconMinimize) {
+                iconMinimize.style.display = 'none';
+            }
+            this._element.dispatchEvent(event);
+        }
+        toggleFullScreen() {
+            if (document.fullscreenEnabled) {
+                if (document.fullscreenElement) {
+                    this.outFullscreen();
+                }
+                else {
+                    this.inFullScreen();
+                }
+            }
+        }
+    }
+    /**
+     * Data Api implementation
+     * ============================================================================
+     */
+    onDOMContentLoaded(() => {
+        const buttons = document.querySelectorAll(SELECTOR_FULLSCREEN_TOGGLE);
+        buttons.forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.preventDefault();
+                const target = event.target;
+                const button = target.closest(SELECTOR_FULLSCREEN_TOGGLE);
+                if (button) {
+                    const data = new FullScreen(button, undefined);
+                    data.toggleFullScreen();
+                }
+            });
+        });
+    });
+
+    exports.CardWidget = CardWidget;
+    exports.DirectChat = DirectChat;
+    exports.FullScreen = FullScreen;
+    exports.Layout = Layout;
+    exports.PushMenu = PushMenu;
+    exports.Treeview = Treeview;
+
+}));
+//# sourceMappingURL=adminlte.js.map
